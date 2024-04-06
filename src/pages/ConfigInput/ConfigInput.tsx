@@ -13,22 +13,11 @@ const ConfigInput = () => {
     messagingSenderId: "",
     appId: "",
     measurementId: "",
+    authorizationKey: "",
   });
 
   const [winData, setWinData] = useState<any>();
   const [firebases, setFirebases] = useState<any>();
-
-  // const [addedNewConfig, setAddedNewConfig] = useState(false);
-
-  // const convertTime = (timestamp: string) => {
-  //   const dateObj = new Date(Number(timestamp));
-
-  //   const date = dateObj.getDate().toString().padStart(2, "0");
-  //   const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-  //   const year = dateObj.getFullYear();
-
-  //   return `${date}-${month}-${year}`;
-  // };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -287,6 +276,13 @@ const ConfigInput = () => {
           type="text"
           name="measurementId"
           value={config.measurementId}
+          onChange={handleChange}
+        />
+        <label>SERVER KEY</label>
+        <input
+          type="text"
+          name="authorizationKey"
+          value={config.authorizationKey}
           onChange={handleChange}
         />
         <button type="submit">Submit</button>

@@ -18,7 +18,8 @@
   .dataGrid {
     background-color: white;
     padding: 20px;
-    width: 82.5vw;
+    width: calc(100% - 120px);
+    // width: 100%;
 
     @include md {
       padding: 10px;
