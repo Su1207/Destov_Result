@@ -11,3 +11,15 @@
 *::-webkit-scrollbar {
   display: none;
 }
+
+.admin-column {
+  .arrow-icon {
+    transition: transform 0.3s ease-in-out;
+  }
+}
+
+.admin {
+  .arrow-icon {
+    transform: rotate(-180deg);
+  }
+}
