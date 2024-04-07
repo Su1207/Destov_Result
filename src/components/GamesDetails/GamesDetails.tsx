@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { get, ref, onValue } from "firebase/database";
 import { database } from "../../firebase";
 import GamesDataGrid from "./GamesDataGrid";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export interface GameData {
   key: string;
@@ -80,7 +81,9 @@ const GamesDetails = () => {
   return (
     <div>
       {isLoading ? (
-        <p>Loading...</p>
+        <div className="w-full h-[100vh] flex items-center justify-center">
+          <CircularProgress color="secondary" />
+        </div>
       ) : (
         gameData && <GamesDataGrid gameData={gameData} />
       )}

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { database } from "../../firebase";
 import { get, getDatabase, push, ref, set } from "firebase/database";
 import { initializeApp } from "firebase/app";
+import { toast } from "react-toastify";
+import { CircularProgress } from "@mui/material";
 
 const ConfigInput = () => {
   const [config, setConfig] = useState({
@@ -18,6 +20,7 @@ const ConfigInput = () => {
 
   const [winData, setWinData] = useState<any>();
   const [firebases, setFirebases] = useState<any>();
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -31,6 +34,7 @@ const ConfigInput = () => {
     e.preventDefault();
 
     try {
+      setLoading(true);
       const data = { ...config };
       const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
 
@@ -46,8 +50,23 @@ const ConfigInput = () => {
       await set(newDataRef, data);
 
       console.log("Data added successfully!");
+      toast.success("Configuration added successfully!");
+      setConfig({
+        apiKey: "",
+        authDomain: "",
+        databaseURL: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: "",
+        measurementId: "",
+        authorizationKey: "",
+      });
     } catch (error) {
       console.error("Error adding data:", error);
+      toast.error("Error adding configuration");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -220,95 +239,145 @@ const ConfigInput = () => {
   console.log(firebases);
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <label>API KEY</label>
-        <input
-          type="text"
-          name="apiKey"
-          value={config.apiKey}
-          onChange={handleChange}
-        />
-        <label>AUTH DOMAIN</label>
-        <input
-          type="text"
-          name="authDomain"
-          value={config.authDomain}
-          onChange={handleChange}
-        />
-        <label>DATABASE URL</label>
-        <input
-          type="text"
-          name="databaseURL"
-          value={config.databaseURL}
-          onChange={handleChange}
-        />
-        <label>PROJECT ID</label>
-        <input
-          type="text"
-          name="projectId"
-          value={config.projectId}
-          onChange={handleChange}
-        />
-        <label>STORAGE BUCKET</label>
-        <input
-          type="text"
-          name="storageBucket"
-          value={config.storageBucket}
-          onChange={handleChange}
-        />
-        <label>MESSAGING SENDER ID</label>
-        <input
-          type="text"
-          name="messagingSenderId"
-          value={config.messagingSenderId}
-          onChange={handleChange}
-        />
-        <label>APP ID</label>
-        <input
-          type="text"
-          name="appId"
-          value={config.appId}
-          onChange={handleChange}
-        />
-        <label>MEASUREMENT ID</label>
-        <input
-          type="text"
-          name="measurementId"
-          value={config.measurementId}
-          onChange={handleChange}
-        />
-        <label>SERVER KEY</label>
-        <input
-          type="text"
-          name="authorizationKey"
-          value={config.authorizationKey}
-          onChange={handleChange}
-        />
-        <button type="submit">Submit</button>
-      </form>
-
-      {/* <div className="radio-options">
-        {firebases &&
-          Object.entries(firebases).map(([index, firebase]: [string, any]) => (
-            <div key={index}>
+    <div className="">
+      {loading ? (
+        <div className="w-full h-[100vh] flex items-center justify-center">
+          <CircularProgress color="secondary" />
+        </div>
+      ) : (
+        <>
+          <div className=" font-bold text-[1.5rem] text-[#6c757d] mb-4">
+            Firebase Configuration
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+              <div className="">
+                <label className="block text-xs  font-medium text-gray-500">
+                  API KEY<span className=" text-[#F05387]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="apiKey"
+                  value={config.apiKey}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none outline-none focus:ring-offset-0 sm:text-sm"
+                />
+              </div>
+              <div className="">
+                <label className="block text-xs  font-medium text-gray-500">
+                  AUTH DOMAIN<span className=" text-[#F05387]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="authDomain"
+                  value={config.authDomain}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                />
+              </div>
               <div>
-                <input type="radio" value={firebase.firebaseName} />
-                {firebase.firebaseName}
+                <label className="block text-xs  font-medium text-gray-500">
+                  DATABASE URL<span className=" text-[#F05387]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="databaseURL"
+                  value={config.databaseURL}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs  font-medium text-gray-500">
+                  PROJECT ID<span className=" text-[#F05387]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="projectId"
+                  value={config.projectId}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs  font-medium text-gray-500">
+                  STORAGE BUCKET<span className=" text-[#F05387]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="storageBucket"
+                  value={config.storageBucket}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs  font-medium text-gray-500">
+                  MESSAGING SENDER ID<span className=" text-[#F05387]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="messagingSenderId"
+                  value={config.messagingSenderId}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs  font-medium text-gray-500">
+                  APP ID<span className=" text-[#F05387]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="appId"
+                  value={config.appId}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs  font-medium text-gray-500">
+                  MEASUREMENT ID
+                </label>
+                <input
+                  type="text"
+                  name="measurementId"
+                  value={config.measurementId}
+                  onChange={handleChange}
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs  font-medium text-gray-500">
+                  SERVER KEY<span className=" text-[#F05387]">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="authorizationKey"
+                  value={config.authorizationKey}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                />
               </div>
             </div>
-          ))}
-
-        {winData &&
-          Object.keys(winData).map((index) => (
-            <div key={index}>
-              <div>
-                <input type="radio" value={index} />
-                {index}
-              </div>
-            </div>
-          ))}
-      </div> */}
+            <button
+              type="submit"
+              className="w-full mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#F05387] hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Submit
+            </button>
+          </form>
+        </>
+      )}
     </div>
   );
 };

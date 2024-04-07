@@ -2,7 +2,7 @@
 
 .market_name {
   justify-content: flex-start !important;
-  padding-left: 1.4rem !important;
+  // padding-left: 1.4rem !important;
 }
 
 .update_img {
@@ -18,12 +18,11 @@
   .dataGrid {
     background-color: white;
     padding: 20px;
-    width: calc(100% - 120px);
-    // width: 100%;
+    width: calc(100% - 100px);
 
-    @include md {
+    @include lg {
       padding: 10px;
-      width: auto;
+      width: 90vw;
     }
 
     .MuiDataGrid-cell {

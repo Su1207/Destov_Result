@@ -383,10 +383,16 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
           <span className="close" onClick={() => setOpenClose(false)}>
             <ClearIcon />
           </span>
-          <h2>{gameName}</h2>
-          <p>Please choose which market do you want to explore ?</p>
-          <button onClick={handleOpen}>OPEN</button>
-          <button onClick={handleClose}>CLOSE</button>
+          <h2 className="text-xl font-bold text-gray-600 mb-2">{gameName}</h2>
+          <p className="mb-2 text-xs">
+            Please choose which market do you want to explore ?
+          </p>
+          <button onClick={handleOpen} className="text-xs sm:text-sm">
+            OPEN
+          </button>
+          <button onClick={handleClose} className="text-xs sm:text-sm">
+            CLOSE
+          </button>
         </div>
       )}
 
