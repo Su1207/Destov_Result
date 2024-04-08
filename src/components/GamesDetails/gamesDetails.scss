@@ -18,7 +18,7 @@
   .dataGrid {
     background-color: #fff;
     padding: 20px;
-    width: calc(100% - 100px);
+    width: calc(100% - 80px);
 
     @include lg {
       padding: 10px;
@@ -91,7 +91,7 @@
   .actions_icons {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 2.5rem;
 
     &:focus {
       outline: none;

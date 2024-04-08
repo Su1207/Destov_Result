@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { database } from "../../firebase";
-import { get, getDatabase, push, ref, set } from "firebase/database";
+import {
+  get,
+  getDatabase,
+  onValue,
+  push,
+  ref,
+  remove,
+} from "firebase/database";
 import { initializeApp } from "firebase/app";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { useAuth } from "../../components/Auth-context";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 const ConfigInput = () => {
   const [config, setConfig] = useState({
@@ -19,7 +28,6 @@ const ConfigInput = () => {
     authorizationKey: "",
   });
 
-  const [firebaseConfig, setFirebaseConfig] = useState<any>();
   const [firebases, setFirebases] = useState<any>();
   const [loading, setLoading] = useState(false);
 
@@ -37,18 +45,18 @@ const ConfigInput = () => {
     try {
       setLoading(true);
       const data = { ...config };
+      console.log(data);
       const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
+
+      await push(dbRef, data);
 
       const snapshot = await get(dbRef);
 
-      const nextNodeName = `FIREBASE${snapshot.size + 1}`;
-
-      const newDataRef = ref(
-        database,
-        `FIREBASE CONFIGURATIONS/${nextNodeName}`
-      );
-
-      await set(newDataRef, data);
+      if (snapshot.size === 1) {
+        fetchData();
+      } else {
+        updateData(data);
+      }
 
       console.log("Data added successfully!");
       toast.success("Configuration added successfully!");
@@ -71,108 +79,122 @@ const ConfigInput = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
-      const dataRef = ref(database, "RESULTS");
-
-      const [dbSnapshot, dataSnapshot] = await Promise.all([
-        get(dbRef),
-        get(dataRef),
-      ]);
-
-      if (dbSnapshot.exists() && dataSnapshot.exists()) {
-        setFirebaseConfig(dataSnapshot.val());
-        setFirebases(dbSnapshot.val());
-      } else if (!dataSnapshot.exists() && dbSnapshot.exists()) {
-        const newDataRef = ref(
-          database,
-          `FIREBASE CONFIGURATIONS/FIREBASE${dbSnapshot.size}`
-        );
-        const winSnapshot = await get(newDataRef);
-        if (winSnapshot.exists()) {
-          const firebaseConfig1 = winSnapshot.val();
-
-          // Initialize Firebase
-          const app1 = initializeApp(firebaseConfig1, `${winSnapshot.size}`);
-          const database1 = getDatabase(app1);
-
-          const game1Ref = ref(database1, "GAMES");
-
-          const gameSnapshot = await get(game1Ref);
-
-          if (gameSnapshot.exists()) {
-            const promises: Promise<void>[] = [];
-            // let gamesName: any = {};
-
-            gameSnapshot.forEach((gameKey) => {
-              const gameName = gameKey.val().NAME;
-
-              push(dataRef, { NAME: gameName });
-              // promises.push(promise);
-            });
-
-            await Promise.all(promises);
-          }
-        }
-      }
-    };
-    fetchData();
-  }, []);
-
-  const handleDelete = async (index: string) => {
-    const dbRemoveref = ref(database, `FIREBASE CONFIGURATIONS/${index}`);
+  const fetchData = async () => {
     const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
+    const dataRef = ref(database, "RESULTS");
 
-    const [removeSnapshot, dbSnapshot] = await Promise.all([
-      get(dbRemoveref),
+    const [dbSnapshot, dataSnapshot] = await Promise.all([
       get(dbRef),
+      get(dataRef),
     ]);
 
-    if (dbSnapshot.exists()) {
-      const marketName: string[] = [];
+    if (!dataSnapshot.exists() && dbSnapshot.exists()) {
+      const dbIds = Object.keys(dbSnapshot.val());
+      const db = dbIds[0];
+      const newDataRef = ref(database, `FIREBASE CONFIGURATIONS/${db}`);
 
-      dbSnapshot.forEach((database) => {
-        if (database.val() !== removeSnapshot.val()) {
-          const firebaseConfig1 = database.val();
-          const firebaseConfig2 = removeSnapshot.val();
+      const dbsnapshot = await get(newDataRef);
 
-          const app1 = initializeApp(firebaseConfig1, "first");
-          const database1 = getDatabase(app1);
+      if (dbsnapshot.exists()) {
+        const firebaseConfig1 = dbsnapshot.val();
 
-          const app2 = initializeApp(firebaseConfig2, "second");
-          const database2 = getDatabase(app2);
+        // Initialize Firebase
+        const app1 = initializeApp(firebaseConfig1, `${dbSnapshot.size}`);
+        const database1 = getDatabase(app1);
 
-          const gameRef = ref(database1, "GAMES");
-          const removeRef = ref(database2, "GAMES");
+        const game1Ref = ref(database1, "GAMES");
 
-          const promises: Promise<void>[] = [];
+        const gameSnapshot = await get(game1Ref);
 
-          const promise1 = get(removeRef).then((removeSnapshot) => {
-            if (removeSnapshot.exists()) {
-              removeSnapshot.forEach((gameKey) => {
-                const gameName = gameKey.val().NAME;
+        if (gameSnapshot.exists()) {
+          // const promises: Promise<void>[] = [];
+          // let gamesName: any = {};
 
-                const promise2 = get(gameRef).then((snapshot) => {
-                  if (snapshot.exists()) {
-                    let gameExists = false;
+          gameSnapshot.forEach((gameKey) => {
+            const gameName = gameKey.val().NAME;
 
-                    snapshot.forEach((gameKey) => {
-                      const name = gameKey.val().NAME;
-
-                      if (gameName === name) {
-                      }
-                    });
-                  }
-                });
-                promises.push(promise2);
-              });
-            }
+            push(dataRef, { NAME: gameName });
+            // promises.push(promise);
           });
-          promises.push(promise1);
+
+          // await Promise.all(promises);
+        }
+      }
+    }
+  };
+
+  const updateData = async (configData: any) => {
+    try {
+      setLoading(true);
+      const resultRef = ref(database, "RESULTS");
+
+      const resultSnapshot = await get(resultRef);
+
+      const app1 = initializeApp(configData, `${configData.apiKey}`);
+      const database1 = getDatabase(app1);
+
+      const gameRef = ref(database1, "GAMES");
+
+      const gameSnapshot = await get(gameRef);
+
+      gameSnapshot.forEach((gameKey) => {
+        const gameName = gameKey.val().NAME;
+        let gameExist = false;
+
+        resultSnapshot.forEach((marketKey) => {
+          if (marketKey.val().NAME === gameName) {
+            gameExist = true;
+          }
+        });
+        if (!gameExist) {
+          push(resultRef, { NAME: gameName });
         }
       });
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    try {
+      const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
+
+      const subscribe = onValue(dbRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setFirebases(snapshot.val());
+        }
+      });
+
+      return () => subscribe();
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
+
+  const { logout } = useAuth();
+
+  const handleUpdate = async (index: string) => {
+    const dbref = ref(database, `FIREBASE CONFIGURATIONS/${index}`);
+
+    const dataSnapshot = await get(dbref);
+
+    await updateData(dataSnapshot.val());
+    toast.success("Data updated");
+  };
+
+  const handleDelete = async (index: string) => {
+    const permit = window.confirm("Are you sure want to delete the database");
+
+    if (!permit) return;
+
+    const dbRemoveref = ref(database, `FIREBASE CONFIGURATIONS/${index}`);
+
+    await remove(dbRemoveref);
+
+    toast.success("Database removed successfully");
+    logout();
   };
 
   // useEffect(() => {
@@ -291,7 +313,6 @@ const ConfigInput = () => {
   //   fetchWinData();
   // }, [addedNewConfig]);
 
-  console.log(firebaseConfig);
   console.log(firebases);
 
   return (
@@ -505,11 +526,13 @@ const ConfigInput = () => {
                         </li> */}
                       </ul>{" "}
                     </div>
-                    <div
-                      onClick={() => handleDelete(index)}
-                      className=" flex justify-end"
-                    >
-                      <DeleteForeverIcon className="text-red-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                    <div className=" flex items-center gap-3 justify-end">
+                      <div onClick={() => handleUpdate(index)}>
+                        <RefreshIcon className="text-green-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                      </div>
+                      <div onClick={() => handleDelete(index)}>
+                        <DeleteForeverIcon className="text-red-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                      </div>
                     </div>
                   </div>
                 );

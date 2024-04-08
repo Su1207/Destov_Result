@@ -1,0 +1,101 @@
+@import "../../styles/responsive.scss";
+@import "../../styles/variables.scss";
+
+.openCloseOption_container {
+  width: 100vw;
+  min-height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  background-color: rgba(14, 13, 13, 0.724);
+  overflow-x: hidden;
+  font-family: "Inter", sans-serif !important;
+
+  .openCloseOption_main_container {
+    width: 35%;
+    padding: 30px;
+    background: aliceblue;
+    color: black;
+    border-radius: 15px;
+    position: relative;
+
+    @include lg {
+      width: 50%;
+    }
+
+    @include md {
+      width: 80%;
+    }
+
+    @include sm {
+      width: 80vw;
+      padding: auto;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+    }
+
+    h2 {
+      @include sm {
+        font-size: 1rem;
+      }
+    }
+
+    p {
+      font-size: 0.875rem;
+      font-weight: 300;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      width: 100%;
+
+      label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      input {
+        padding: 6px 10px;
+        width: 100%;
+        font-size: 0.8rem;
+        background: transparent;
+        color: black;
+        border: 1px solid $soft-color;
+        outline: none;
+        border-radius: 3px;
+      }
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 0;
+      border-radius: 3px;
+      outline: none;
+      border: none;
+      background: #000;
+      font-size: 0.75rem;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+
+      &:hover {
+        background-color: #00cea8;
+      }
+    }
+  }
+}
