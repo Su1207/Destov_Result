@@ -188,8 +188,8 @@ const Layout = (props: Props) => {
   return (
     <div>
       {isAuthenticated ? (
-        <div className="flex flex-col overflow-x-hidden">
-          <Box sx={{ display: "flex" }}>
+        <div className="flex flex-col overflow-x-hidden w-full">
+          <Box sx={{ display: "flex", width: "100%" }}>
             <CssBaseline />
             <div className=" hidden lg:block">
               <AppBar1
@@ -429,9 +429,9 @@ const Layout = (props: Props) => {
                 minHeight: "100vh",
               }}
             >
-              <DrawerHeader />
+              <DrawerHeader sx={{ display: { sm: "block" } }} />
 
-              <div className=" flex-1">
+              <div className="w-full flex-1">
                 <Outlet />
               </div>
 

@@ -64,11 +64,13 @@
 
       label {
         font-weight: 600;
+        margin-bottom: 0.5rem;
       }
 
       input {
-        padding: 10px;
+        padding: 6px 10px;
         width: 100%;
+        font-size: 0.8rem;
         background: transparent;
         color: black;
         border: 1px solid $soft-color;
@@ -84,6 +86,7 @@
       outline: none;
       border: none;
       background: #000;
+      font-size: 0.75rem;
       color: #fff;
       cursor: pointer;
       transition: all 0.3s;

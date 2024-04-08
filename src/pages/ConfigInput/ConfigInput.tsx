@@ -120,6 +120,61 @@ const ConfigInput = () => {
     fetchData();
   }, []);
 
+  const handleDelete = async (index: string) => {
+    const dbRemoveref = ref(database, `FIREBASE CONFIGURATIONS/${index}`);
+    const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
+
+    const [removeSnapshot, dbSnapshot] = await Promise.all([
+      get(dbRemoveref),
+      get(dbRef),
+    ]);
+
+    if (dbSnapshot.exists()) {
+      const marketName: string[] = [];
+
+      dbSnapshot.forEach((database) => {
+        if (database.val() !== removeSnapshot.val()) {
+          const firebaseConfig1 = database.val();
+          const firebaseConfig2 = removeSnapshot.val();
+
+          const app1 = initializeApp(firebaseConfig1, "first");
+          const database1 = getDatabase(app1);
+
+          const app2 = initializeApp(firebaseConfig2, "second");
+          const database2 = getDatabase(app2);
+
+          const gameRef = ref(database1, "GAMES");
+          const removeRef = ref(database2, "GAMES");
+
+          const promises: Promise<void>[] = [];
+
+          const promise1 = get(removeRef).then((removeSnapshot) => {
+            if (removeSnapshot.exists()) {
+              removeSnapshot.forEach((gameKey) => {
+                const gameName = gameKey.val().NAME;
+
+                const promise2 = get(gameRef).then((snapshot) => {
+                  if (snapshot.exists()) {
+                    let gameExists = false;
+
+                    snapshot.forEach((gameKey) => {
+                      const name = gameKey.val().NAME;
+
+                      if (gameName === name) {
+                      }
+                    });
+                  }
+                });
+                promises.push(promise2);
+              });
+            }
+          });
+          promises.push(promise1);
+        }
+      });
+    }
+  };
+
   // useEffect(() => {
   //   const fetchWinData = async () => {
   //     try {
@@ -246,13 +301,13 @@ const ConfigInput = () => {
           <CircularProgress color="secondary" />
         </div>
       ) : (
-        <div className="w-full">
-          <div className="w-[100%] border p-8 shadow-lg rounded-sm mb-8">
+        <div className="w-[89vw] xs:w-[100%]">
+          <div className=" border p-4 sm:p-8 shadow-lg rounded-sm mb-8">
             <div className=" font-bold text-[1.5rem] text-[#6c757d] mb-4">
               Firebase Configuration
             </div>
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="">
                   <label className="block text-xs  font-medium text-gray-500">
                     API KEY<span className=" text-[#F05387]">*</span>
@@ -263,7 +318,7 @@ const ConfigInput = () => {
                     value={config.apiKey}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none outline-none focus:ring-offset-0 sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none outline-none focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
                 <div className="">
@@ -276,7 +331,7 @@ const ConfigInput = () => {
                     value={config.authDomain}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
                   />
                 </div>
                 <div>
@@ -289,7 +344,7 @@ const ConfigInput = () => {
                     value={config.databaseURL}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
                   />
                 </div>
 
@@ -303,7 +358,7 @@ const ConfigInput = () => {
                     value={config.projectId}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
                   />
                 </div>
                 <div>
@@ -316,7 +371,7 @@ const ConfigInput = () => {
                     value={config.storageBucket}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
                   />
                 </div>
                 <div>
@@ -330,7 +385,7 @@ const ConfigInput = () => {
                     value={config.messagingSenderId}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
                   />
                 </div>
                 <div>
@@ -343,7 +398,7 @@ const ConfigInput = () => {
                     value={config.appId}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
                   />
                 </div>
                 <div>
@@ -355,7 +410,7 @@ const ConfigInput = () => {
                     name="measurementId"
                     value={config.measurementId}
                     onChange={handleChange}
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
                   />
                 </div>
                 <div>
@@ -368,7 +423,7 @@ const ConfigInput = () => {
                     value={config.authorizationKey}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
                   />
                 </div>
               </div>
@@ -380,19 +435,23 @@ const ConfigInput = () => {
               </button>
             </form>
           </div>
-          <div className="w-[100%] border p-8 shadow-lg rounded-sm">
+
+          <div className=" border p-4 sm:p-8 shadow-lg rounded-sm">
             <div className=" font-bold text-[1.5rem] text-[#6c757d] mb-4">
               Firebase Databases
             </div>
             {firebases &&
               Object.entries(firebases).map(([index, data]: [any, any]) => {
                 return (
-                  <div key={index} className="border p-8 rounded-md mb-4">
+                  <div
+                    key={index}
+                    className="border p-4 sm:p-8 rounded-md mb-4"
+                  >
                     <div>
-                      <ul className=" flex flex-col gap-1">
-                        <li className="text-sm  font-medium text-gray-700">
+                      <ul className=" flex flex-col overflow-auto gap-1">
+                        <li className="text-xs xs:text-sm font-medium text-gray-700">
                           API Key -{" "}
-                          <span className="text-xs text-gray-500">
+                          <span className="text-[10px] xs:text-xs text-gray-500">
                             {data.apiKey}
                           </span>
                         </li>
@@ -446,7 +505,10 @@ const ConfigInput = () => {
                         </li> */}
                       </ul>{" "}
                     </div>
-                    <div className=" flex justify-end">
+                    <div
+                      onClick={() => handleDelete(index)}
+                      className=" flex justify-end"
+                    >
                       <DeleteForeverIcon className="text-red-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
                     </div>
                   </div>
