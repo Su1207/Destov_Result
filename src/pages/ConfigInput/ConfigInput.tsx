@@ -7,6 +7,7 @@ import {
   push,
   ref,
   remove,
+  set,
 } from "firebase/database";
 import { initializeApp } from "firebase/app";
 import { toast } from "react-toastify";
@@ -17,6 +18,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 
 const ConfigInput = () => {
   const [config, setConfig] = useState({
+    name: "",
     apiKey: "",
     authDomain: "",
     databaseURL: "",
@@ -53,14 +55,15 @@ const ConfigInput = () => {
       const snapshot = await get(dbRef);
 
       if (snapshot.size === 1) {
-        fetchData();
+        await fetchData(data);
       } else {
-        updateData(data);
+        await updateData(data);
       }
 
       console.log("Data added successfully!");
       toast.success("Configuration added successfully!");
       setConfig({
+        name: "",
         apiKey: "",
         authDomain: "",
         databaseURL: "",
@@ -79,46 +82,33 @@ const ConfigInput = () => {
     }
   };
 
-  const fetchData = async () => {
-    const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
+  const fetchData = async (data: any) => {
+    // const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
     const dataRef = ref(database, "RESULTS");
 
-    const [dbSnapshot, dataSnapshot] = await Promise.all([
-      get(dbRef),
-      get(dataRef),
-    ]);
+    if (data) {
+      const firebaseConfig1 = data;
 
-    if (!dataSnapshot.exists() && dbSnapshot.exists()) {
-      const dbIds = Object.keys(dbSnapshot.val());
-      const db = dbIds[0];
-      const newDataRef = ref(database, `FIREBASE CONFIGURATIONS/${db}`);
+      // Initialize Firebase
+      const app1 = initializeApp(firebaseConfig1, `${data.name}`);
+      const database1 = getDatabase(app1);
 
-      const dbsnapshot = await get(newDataRef);
+      const game1Ref = ref(database1, "GAMES");
 
-      if (dbsnapshot.exists()) {
-        const firebaseConfig1 = dbsnapshot.val();
+      const gameSnapshot = await get(game1Ref);
 
-        // Initialize Firebase
-        const app1 = initializeApp(firebaseConfig1, `${dbSnapshot.size}`);
-        const database1 = getDatabase(app1);
+      if (gameSnapshot.exists()) {
+        // const promises: Promise<void>[] = [];
+        // let gamesName: any = {};
 
-        const game1Ref = ref(database1, "GAMES");
+        gameSnapshot.forEach((gameKey) => {
+          const gameName = gameKey.val().NAME;
 
-        const gameSnapshot = await get(game1Ref);
+          push(dataRef, { NAME: gameName, APP: [data.name] });
+          // promises.push(promise);
+        });
 
-        if (gameSnapshot.exists()) {
-          // const promises: Promise<void>[] = [];
-          // let gamesName: any = {};
-
-          gameSnapshot.forEach((gameKey) => {
-            const gameName = gameKey.val().NAME;
-
-            push(dataRef, { NAME: gameName });
-            // promises.push(promise);
-          });
-
-          // await Promise.all(promises);
-        }
+        // await Promise.all(promises);
       }
     }
   };
@@ -137,19 +127,33 @@ const ConfigInput = () => {
 
       const gameSnapshot = await get(gameRef);
 
+      const promises: Promise<void>[] = [];
+
       gameSnapshot.forEach((gameKey) => {
         const gameName = gameKey.val().NAME;
         let gameExist = false;
 
         resultSnapshot.forEach((marketKey) => {
           if (marketKey.val().NAME === gameName) {
+            const appArray = marketKey.val().APP || [];
+
+            if (!appArray.includes(configData.name)) {
+              appArray.push(configData.name);
+
+              const gameAppRef = ref(database, `RESULTS/${marketKey.key}/APP`);
+              const promise1 = set(gameAppRef, appArray);
+              promises.push(promise1);
+            }
+
             gameExist = true;
           }
         });
         if (!gameExist) {
-          push(resultRef, { NAME: gameName });
+          push(resultRef, { NAME: gameName, APP: [configData.name] });
         }
       });
+
+      await Promise.all(promises);
     } catch (err) {
       console.log(err);
     } finally {
@@ -184,134 +188,44 @@ const ConfigInput = () => {
     toast.success("Data updated");
   };
 
-  const handleDelete = async (index: string) => {
+  const handleDelete = async (index: string, name: string) => {
     const permit = window.confirm("Are you sure want to delete the database");
 
     if (!permit) return;
 
     const dbRemoveref = ref(database, `FIREBASE CONFIGURATIONS/${index}`);
+    const marketRef = ref(database, `RESULTS`);
 
     await remove(dbRemoveref);
+
+    const snapshot = await get(marketRef);
+
+    const promises: Promise<void>[] = [];
+
+    snapshot.forEach((gameKey) => {
+      if (gameKey.exists()) {
+        const appArray = gameKey.val().APP || [];
+        const updatedAppArray = appArray.filter(
+          (dbName: string) => dbName !== name
+        );
+
+        if (updatedAppArray.length === 0) {
+          const gameAppRef = ref(database, `RESULTS/${gameKey.key}`);
+          const promise1 = remove(gameAppRef);
+          promises.push(promise1);
+        } else {
+          // Update the app array in the database
+          const gameAppRef = ref(database, `RESULTS/${gameKey.key}/APP`);
+          const promise = set(gameAppRef, updatedAppArray);
+          promises.push(promise);
+        }
+      }
+    });
+    await Promise.all(promises);
 
     toast.success("Database removed successfully");
     logout();
   };
-
-  // useEffect(() => {
-  //   const fetchWinData = async () => {
-  //     try {
-  //       if (addedNewConfig) {
-  //         const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
-  //         const snapshot = await get(dbRef);
-  //         const newDataRef = ref(
-  //           database,
-  //           `FIREBASE CONFIGURATIONS/FIREBASE${snapshot.size}`
-  //         );
-  //         const winSnapshot = await get(newDataRef);
-
-  //         if (winSnapshot.exists()) {
-  //           const firebaseConfig1 = {
-  //             apiKey: winSnapshot.val().apiKey,
-  //             authDomain: winSnapshot.val().authDomain,
-  //             databaseURL: winSnapshot.val().databaseURL,
-  //             projectId: winSnapshot.val().projectId,
-  //             storageBucket: winSnapshot.val().storageBucket,
-  //             messagingSenderId: winSnapshot.val().messagingSenderId,
-  //             appId: winSnapshot.val().appId,
-  //             measurementId: winSnapshot.val().measurementId,
-  //           };
-
-  //           // Initialize Firebase
-  //           const app1 = initializeApp(firebaseConfig1, `${snapshot.size}`);
-  //           const database1 = getDatabase(app1);
-
-  //           const resultRef1 = ref(database1, "GAME CHART");
-  //           const game1Ref = ref(database1, "GAMES");
-
-  //           const [winDataSnapshot, marketSnapshot] = await Promise.all([
-  //             get(resultRef1),
-  //             get(game1Ref),
-  //           ]);
-
-  //           if (winDataSnapshot.exists()) {
-  //             const promises: Promise<void>[] = [];
-
-  //             marketSnapshot.forEach((marketsnapshot) => {
-  //               const marketKey = marketsnapshot.key;
-  //               const marketName = marketsnapshot.val().NAME;
-  //               let gameResultData: any = {};
-
-  //               winDataSnapshot.forEach((gamesnaphsot) => {
-  //                 if (marketKey === gamesnaphsot.key) {
-  //                   const dateStringResult: any = {};
-  //                   gamesnaphsot.forEach((timeSnap) => {
-  //                     const timestamp = timeSnap.key;
-  //                     const dateString = convertTime(timestamp);
-  //                     const open = timeSnap.val().OPEN;
-  //                     const close = timeSnap.val().CLOSE;
-  //                     const mid = timeSnap.val().MID;
-  //                     const result = `${open}-${mid}-${close}`;
-
-  //                     const gameName = winSnapshot.val().firebaseName;
-
-  //                     dateStringResult[dateString] = { [gameName]: result };
-  //                   });
-  //                   gameResultData = dateStringResult;
-  //                 }
-  //               });
-
-  //               const newdbRef = ref(database, `COMBINE RESULTS/${marketName}`);
-
-  //               const promise1 = get(newdbRef).then(async (newSnapshot) => {
-  //                 if (!newSnapshot.exists()) {
-  //                   const promise2 = set(newdbRef, gameResultData);
-  //                   promises.push(promise2);
-  //                 } else {
-  //                   const existingData = newSnapshot.val(); // Get existing data
-
-  //                   const newData: any = {};
-
-  //                   // Merge existing data with new data based on date keys
-  //                   Object.keys(existingData).forEach(async (dateKey) => {
-  //                     if (gameResultData[dateKey]) {
-  //                       // If date key exists in both existing data and new data, combine results
-  //                       newData[dateKey] = {
-  //                         ...existingData[dateKey],
-  //                         ...gameResultData[dateKey],
-  //                       };
-  //                     } else {
-  //                       // If date key exists only in existing data, keep it as is
-  //                       newData[dateKey] = existingData[dateKey];
-  //                     }
-  //                   });
-
-  //                   // Add new dates from gameResultData that don't exist in existing data
-  //                   Object.keys(gameResultData).forEach(async (dateKey) => {
-  //                     if (!existingData[dateKey]) {
-  //                       newData[dateKey] = gameResultData[dateKey];
-  //                     }
-  //                   });
-
-  //                   const promise2 = set(newdbRef, newData); // Set the merged data to the database
-  //                   promises.push(promise2);
-  //                 }
-
-  //                 promises.push(promise1);
-  //               });
-  //             });
-
-  //             await Promise.all(promises);
-  //           }
-  //         }
-  //         console.log("Data uploaded successfully");
-  //         setAddedNewConfig(false);
-  //       }
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   };
-  //   fetchWinData();
-  // }, [addedNewConfig]);
 
   console.log(firebases);
 
@@ -329,6 +243,19 @@ const ConfigInput = () => {
             </div>
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="">
+                  <label className="block text-xs  font-medium text-gray-500">
+                    NAME<span className=" text-[#F05387]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={config.name}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none outline-none focus:ring-offset-0 sm:text-sm"
+                  />
+                </div>
                 <div className="">
                   <label className="block text-xs  font-medium text-gray-500">
                     API KEY<span className=" text-[#F05387]">*</span>
@@ -457,87 +384,94 @@ const ConfigInput = () => {
             </form>
           </div>
 
-          <div className=" border p-4 sm:p-8 shadow-lg rounded-sm">
-            <div className=" font-bold text-[1.5rem] text-[#6c757d] mb-4">
-              Firebase Databases
-            </div>
-            {firebases &&
-              Object.entries(firebases).map(([index, data]: [any, any]) => {
-                return (
-                  <div
-                    key={index}
-                    className="border p-4 sm:p-8 rounded-md mb-4"
-                  >
-                    <div>
-                      <ul className=" flex flex-col overflow-auto gap-1">
-                        <li className="text-xs xs:text-sm font-medium text-gray-700">
-                          API Key -{" "}
-                          <span className="text-[10px] xs:text-xs text-gray-500">
-                            {data.apiKey}
-                          </span>
-                        </li>
-                        <li className="text-sm  font-medium text-gray-700">
-                          Auth Domain -{" "}
-                          <span className="text-xs text-gray-500">
-                            {data.authDomain}
-                          </span>
-                        </li>
-                        <li className="text-sm  font-medium text-gray-700">
-                          Database URL -{" "}
-                          <span className="text-xs text-gray-500">
-                            {data.databaseURL}
-                          </span>
-                        </li>
-                        <li className="text-sm  font-medium text-gray-700">
-                          Project ID -{" "}
-                          <span className="text-xs text-gray-500">
-                            {data.projectId}
-                          </span>
-                        </li>
-                        <li className="text-sm  font-medium text-gray-700">
-                          Storage Bucket -{" "}
-                          <span className="text-xs text-gray-500">
-                            {data.storageBucket}
-                          </span>
-                        </li>
-                        <li className="text-sm  font-medium text-gray-700">
-                          Messaging Sender ID -{" "}
-                          <span className="text-xs text-gray-500">
-                            {data.messagingSenderId}
-                          </span>
-                        </li>
-                        <li className="text-sm  font-medium text-gray-700">
-                          APP ID -{" "}
-                          <span className="text-xs text-gray-500">
-                            {data.appId}
-                          </span>
-                        </li>
-                        <li className="text-sm  font-medium text-gray-700">
-                          Measurement ID -{" "}
-                          <span className="text-xs text-gray-500">
-                            {data.measurementId}
-                          </span>
-                        </li>
-                        {/* <li className="text-sm  font-medium text-gray-700">
+          {firebases ? (
+            <div className=" border p-4 sm:p-8 shadow-lg rounded-sm">
+              <div className=" font-bold text-[1.5rem] text-[#6c757d] mb-4">
+                Firebase Databases
+              </div>
+              {firebases &&
+                Object.entries(firebases).map(([index, data]: [any, any]) => {
+                  return (
+                    <div
+                      key={index}
+                      className="border p-4 sm:p-8 rounded-md mb-4"
+                    >
+                      <div>
+                        <div className="font-semibold uppercase text-[1rem] text-[#6c757d] mb-2">
+                          {data.name}
+                        </div>
+                        <ul className=" flex flex-col overflow-auto gap-1">
+                          <li className="text-xs xs:text-sm font-medium text-gray-700">
+                            API Key -{" "}
+                            <span className="text-[10px] xs:text-xs text-gray-500">
+                              {data.apiKey}
+                            </span>
+                          </li>
+                          <li className="text-sm  font-medium text-gray-700">
+                            Auth Domain -{" "}
+                            <span className="text-xs text-gray-500">
+                              {data.authDomain}
+                            </span>
+                          </li>
+                          <li className="text-sm  font-medium text-gray-700">
+                            Database URL -{" "}
+                            <span className="text-xs text-gray-500">
+                              {data.databaseURL}
+                            </span>
+                          </li>
+                          <li className="text-sm  font-medium text-gray-700">
+                            Project ID -{" "}
+                            <span className="text-xs text-gray-500">
+                              {data.projectId}
+                            </span>
+                          </li>
+                          <li className="text-sm  font-medium text-gray-700">
+                            Storage Bucket -{" "}
+                            <span className="text-xs text-gray-500">
+                              {data.storageBucket}
+                            </span>
+                          </li>
+                          <li className="text-sm  font-medium text-gray-700">
+                            Messaging Sender ID -{" "}
+                            <span className="text-xs text-gray-500">
+                              {data.messagingSenderId}
+                            </span>
+                          </li>
+                          <li className="text-sm  font-medium text-gray-700">
+                            APP ID -{" "}
+                            <span className="text-xs text-gray-500">
+                              {data.appId}
+                            </span>
+                          </li>
+                          <li className="text-sm  font-medium text-gray-700">
+                            Measurement ID -{" "}
+                            <span className="text-xs text-gray-500">
+                              {data.measurementId}
+                            </span>
+                          </li>
+                          {/* <li className="text-sm  font-medium text-gray-700">
                           Server Key -{" "}
                           <span className=" text-gray-500">
                             {data.authorizationKey}
                           </span>
                         </li> */}
-                      </ul>{" "}
-                    </div>
-                    <div className=" flex items-center gap-3 justify-end">
-                      <div onClick={() => handleUpdate(index)}>
-                        <RefreshIcon className="text-green-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                        </ul>{" "}
                       </div>
-                      <div onClick={() => handleDelete(index)}>
-                        <DeleteForeverIcon className="text-red-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                      <div className=" flex items-center gap-3 justify-end">
+                        <div onClick={() => handleUpdate(index)}>
+                          <RefreshIcon className="text-green-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                        </div>
+                        <div onClick={() => handleDelete(index, data.name)}>
+                          <DeleteForeverIcon className="text-red-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-          </div>
+                  );
+                })}
+            </div>
+          ) : (
+            <div></div>
+          )}
         </div>
       )}
     </div>

@@ -6,10 +6,6 @@ import "./gamesDetails.scss";
 // import { toast } from "react-toastify";
 import { useState } from "react";
 import OpenCloseOption from "../OpenCloseOption/OpenCloseOption";
-import { database } from "../../firebase";
-import { ref, remove } from "firebase/database";
-import { toast } from "react-toastify";
-import EditGame from "../EditGames/EditGame";
 // import EditGame from "../EditGames/EditGame";
 // import OpenCloseOption from "../OpenCloseOption/OpenCloseOption";
 // import Rewards from "../Rewards/Rewards";
@@ -30,7 +26,6 @@ const GamesDataGrid: React.FC<gameDataGridProps> = ({ gameData }) => {
   const [gameId, setGameId] = useState("");
   const [gameName, setGameName] = useState("");
   const [openClose, setOpenClose] = useState(false);
-  const [editGame, setEditGame] = useState(false);
   // const [rewards, setRewards] = useState(false);
   const [clickPosition, setClickPosition] = useState<ClickPosition | null>(
     null
@@ -63,18 +58,18 @@ const GamesDataGrid: React.FC<gameDataGridProps> = ({ gameData }) => {
     {
       field: "name",
       headerName: "Market",
-      width: 220,
+      width: 200,
       // cellClassName: "market_name",
     },
     {
       field: "result",
       headerName: "Result",
-      width: 180,
+      width: 160,
     },
     {
       field: "updateResult",
       headerName: "Update Result",
-      width: 150,
+      width: 140,
       renderCell: (params) => (
         <div>
           <img
@@ -89,51 +84,18 @@ const GamesDataGrid: React.FC<gameDataGridProps> = ({ gameData }) => {
       ),
     },
     {
-      field: "actions",
-      headerName: "Actions",
-      width: 160,
-      sortable: false,
-      renderCell: (params) => (
-        <div className="actions_icons">
-          <img
-            style={{ cursor: "pointer" }}
-            src="view.svg"
-            alt=""
-            onClick={(event) => handleEdit(params.row.id, event)}
-          />
-          <img
-            style={{ cursor: "pointer" }}
-            src="delete.svg"
-            alt=""
-            onClick={() => handleDelete(params.row.id)}
-          />
-        </div>
-      ),
+      field: "app",
+      headerName: "App",
+      width: 300,
     },
   ];
-
-  const handleEdit = (gameid: string, event: React.MouseEvent) => {
-    setEditGame(!editGame);
-    setGameId(gameid);
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left + window.scrollX; // Adjust for horizontal scroll
-    const y = event.clientY - rect.top + window.scrollY;
-    setClickPosition({ x, y });
-  };
-
-  const handleDelete = async (gameId: string) => {
-    const gameRef = ref(database, `RESULTS/${gameId}`);
-
-    await remove(gameRef);
-
-    toast.success("Market deleted successfully");
-  };
 
   const rows = gameData.map((game) => {
     return {
       id: game.key,
       name: game.NAME,
       result: game.RESULT,
+      app: game.APP,
     };
   });
   return (
@@ -146,13 +108,13 @@ const GamesDataGrid: React.FC<gameDataGridProps> = ({ gameData }) => {
           clickPosition={clickPosition}
         />
       )}
-      {editGame && (
+      {/* {editGame && (
         <EditGame
           gameId={gameId}
           setEditGame={setEditGame}
           clickPosition={clickPosition}
         />
-      )}
+      )} */}
       {rows.length > 0 ? (
         <DataGrid
           className="dataGrid"

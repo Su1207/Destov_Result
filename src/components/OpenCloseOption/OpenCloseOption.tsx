@@ -195,13 +195,13 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                       }
                     });
                     promises.push(promise);
+                    sendNotificationToTopic(
+                      gameName,
+                      `${openFormResult}-${midResult}-✦✦✦`,
+                      firebaseConfig.val().authorizationKey
+                    );
                   }
                 });
-                sendNotificationToTopic(
-                  gameName,
-                  `${openFormResult}-${midResult}-✦✦✦`,
-                  firebaseConfig.val().authorizationKey
-                );
               }
             });
             promises.push(promise1);
@@ -345,14 +345,13 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                           }
                         );
                         promises.push(promise);
+                        sendNotificationToTopic(
+                          gameName,
+                          `${open}-${midResult}-${closeFormResult}`,
+                          firebaseConfig.val().authorizationKey
+                        );
                       }
                     });
-
-                    sendNotificationToTopic(
-                      gameName,
-                      `${open}-${midResult}-${closeFormResult}`,
-                      firebaseConfig.val().authorizationKey
-                    );
                   }
                 });
                 promises.push(promise1);

@@ -8,6 +8,7 @@ export interface GameData {
   key: string;
   NAME: string;
   RESULT: string;
+  APP: string[];
 }
 
 const formatResult = (open: string, mid: string, close: string): string => {
@@ -43,6 +44,7 @@ const GamesDetails = () => {
                 .val();
 
               const name = snapshot.child(gameKey).child("NAME").val();
+              const app = snapshot.child(gameKey).child("APP").val();
 
               const resultString = resultData
                 ? formatResult(
@@ -56,6 +58,7 @@ const GamesDetails = () => {
                 key: gameKey,
                 NAME: name,
                 RESULT: resultString,
+                APP: app,
               };
             }
           );
