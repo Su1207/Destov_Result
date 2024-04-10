@@ -23,3 +23,16 @@
     transform: rotate(-180deg);
   }
 }
+
+.no-data {
+  background: transparent;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .no-data-img {
+    height: 300px;
+    border-radius: 50%;
+  }
+}

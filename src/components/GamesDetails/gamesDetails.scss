@@ -22,12 +22,12 @@
 
     @include lg {
       padding: 10px;
-      width: 90vw;
+      width: auto;
     }
 
-    @include sm {
-      width: 89vw;
-    }
+    // @include sm {
+    //   width: 89vw;
+    // }
 
     .MuiDataGrid-cell {
       display: flex;

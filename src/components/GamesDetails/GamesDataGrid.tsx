@@ -99,7 +99,7 @@ const GamesDataGrid: React.FC<gameDataGridProps> = ({ gameData }) => {
     };
   });
   return (
-    <div className="dataTable">
+    <div className="dataTable w-full">
       {openClose && (
         <OpenCloseOption
           gameId={gameId}
@@ -117,7 +117,7 @@ const GamesDataGrid: React.FC<gameDataGridProps> = ({ gameData }) => {
       )} */}
       {rows.length > 0 ? (
         <DataGrid
-          className="dataGrid"
+          className="dataGrid w-full overflow-x-auto"
           rows={rows}
           columns={columns}
           slots={{ toolbar: GridToolbar }}

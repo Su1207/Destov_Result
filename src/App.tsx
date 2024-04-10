@@ -9,6 +9,7 @@ import { AuthProvider } from "./components/Auth-context";
 import Login from "./pages/login/Login";
 import "./styles/global.scss";
 import Profile from "./pages/Profile/Profile";
+import BidDataPage from "./pages/BidDataPage/BidDataPage";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
       {
         path: "/profile",
         element: <Profile />,
+      },
+      {
+        path: "/bidData",
+        element: <BidDataPage />,
       },
     ],
   },

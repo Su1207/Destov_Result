@@ -1,0 +1,33 @@
+@import "../../styles/responsive.scss";
+
+.MuiStack-root {
+  display: flex;
+  justify-content: end;
+  margin-bottom: 2rem;
+
+  @include xl {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: end !important;
+    margin-bottom: 2rem;
+  }
+
+  @include sm {
+    display: flex !important;
+    justify-content: end !important;
+    margin-bottom: 1rem;
+  }
+}
+
+.MuiFormControl-root {
+  min-width: 110px !important;
+  max-width: 110px;
+}
+
+.MuiInputBase-root {
+  padding: 0 !important;
+}
+
+.MuiInputBase-input {
+  padding: 8px !important;
+}

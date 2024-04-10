@@ -27,6 +27,7 @@ import Login from "./pages/login/Login";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
+import GavelIcon from "@mui/icons-material/Gavel";
 
 const drawerWidth = 240;
 
@@ -154,7 +155,7 @@ const Layout = (props: Props) => {
         </Typography>
       </div>
       <List>
-        {["Market", "Setting"].map((text, index) => (
+        {["Market", "Bid Data", "Setting"].map((text, index) => (
           <ListItem
             key={text}
             disablePadding
@@ -164,11 +165,17 @@ const Layout = (props: Props) => {
               transition: "all 0.3s ease-in-out",
             }}
             component={Link} // Use Link component from react-router-dom
-            to={index === 0 ? "/" : "/setting"} // Define the route to navigate to
+            to={index === 0 ? "/" : index === 1 ? "/bidData" : "/setting"} // Define the route to navigate to
           >
             <ListItemButton>
               <ListItemIcon sx={{ color: "white" }}>
-                {index % 2 === 0 ? <StorefrontIcon /> : <SettingsIcon />}
+                {index === 0 ? (
+                  <StorefrontIcon />
+                ) : index === 1 ? (
+                  <GavelIcon />
+                ) : (
+                  <SettingsIcon />
+                )}
               </ListItemIcon>
               <ListItemText
                 primary={text}
@@ -186,9 +193,9 @@ const Layout = (props: Props) => {
     window !== undefined ? () => window().document.body : undefined;
 
   return (
-    <div>
+    <div className="overflow-x-hidden w-full">
       {isAuthenticated ? (
-        <div className="flex flex-col overflow-x-hidden w-full">
+        <div className="flex flex-col w-full">
           <Box sx={{ display: "flex", width: "100%" }}>
             <CssBaseline />
             <div className=" hidden lg:block">
@@ -277,7 +284,7 @@ const Layout = (props: Props) => {
                 </DrawerHeader>
                 {/* <Divider sx={{ bgcolor: "white" }} /> */}
                 <List>
-                  {["Market", "Setting"].map((text, index) => (
+                  {["Market", "Bid Data", "Setting"].map((text, index) => (
                     <ListItem
                       key={text}
                       disablePadding
@@ -287,7 +294,13 @@ const Layout = (props: Props) => {
                         transition: "all 0.3s ease-in-out",
                       }}
                       component={Link} // Use Link component from react-router-dom
-                      to={index === 0 ? "/" : "/setting"} // Define the route to navigate to
+                      to={
+                        index === 0
+                          ? "/"
+                          : index === 1
+                          ? "/bidData"
+                          : "/setting"
+                      } // Define the route to navigate to
                     >
                       <ListItemButton
                         sx={{
@@ -306,8 +319,10 @@ const Layout = (props: Props) => {
                             color: "white",
                           }}
                         >
-                          {index % 2 === 0 ? (
+                          {index === 0 ? (
                             <StorefrontIcon />
+                          ) : index === 1 ? (
+                            <GavelIcon />
                           ) : (
                             <SettingsIcon />
                           )}
@@ -427,11 +442,12 @@ const Layout = (props: Props) => {
                 display: "flex",
                 flexDirection: "column",
                 minHeight: "100vh",
+                maxWidth: "100vw",
               }}
             >
-              <DrawerHeader sx={{ display: { sm: "block" } }} />
+              <DrawerHeader sx={{ display: "block" }} />
 
-              <div className="w-full flex-1">
+              <div className="w-full flex-1 ">
                 <Outlet />
               </div>
 
