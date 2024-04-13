@@ -1,15 +1,15 @@
 import BidData from "../../components/BidData/BidData";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 // import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { useState } from "react";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import "./BidDataPage.scss";
+import { useBidDetailsContext } from "../../components/BidData/BidDetailsContext";
 
 const BidDataPage = () => {
-  const [value, setValue] = useState<Dayjs | null>(dayjs(new Date()));
+  const { value, setValue } = useBidDetailsContext();
 
   const [date, month, year] = [value?.date(), value?.month(), value?.year()];
 

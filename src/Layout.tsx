@@ -28,6 +28,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import GavelIcon from "@mui/icons-material/Gavel";
+import { useBidDetailsContext } from "./components/BidData/BidDetailsContext";
 
 const drawerWidth = 240;
 
@@ -110,7 +111,7 @@ interface Props {
 
 const Layout = (props: Props) => {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
+  const { open, setOpen } = useBidDetailsContext();
   const { isAuthenticated } = useAuth();
 
   const handleDrawerOpen = () => {

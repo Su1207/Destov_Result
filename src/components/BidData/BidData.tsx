@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { database } from "../../firebase";
 import { initializeApp } from "firebase/app";
 import { CircularProgress } from "@mui/material";
+import { useBidDetailsContext } from "./BidDetailsContext";
+import { useNavigate } from "react-router-dom";
 
 type BidDataType = {
   appName: string;
@@ -11,6 +13,20 @@ type BidDataType = {
   openTotal: number;
   closeTotal: number;
 };
+
+export type CombineBidDataType = {
+  appName: string[];
+  marketName: string;
+  numbers: { [number: string]: number };
+  marketTotalPoints: number;
+};
+
+export interface MarketDetailsType {
+  appName: string;
+  marketName: string;
+  numbers: { [number: string]: number };
+  marketTotalPoints: number;
+}
 
 type CombineBidType = {
   gameName: string;
@@ -24,7 +40,11 @@ interface BidDataProps {
 }
 
 const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
+  const { bidDetails, setbidDetails } = useBidDetailsContext();
+
   const [bidData, setBidData] = useState<BidDataType[] | null>(null);
+  const { combinebidData, setCombineBidData } = useBidDetailsContext();
+
   const [loading, setLoading] = useState(false);
   const [combineBid, setCombineBid] = useState<CombineBidType[]>();
 
@@ -136,6 +156,8 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     fetchBidData();
   }, [date, month, year, newDate, newMonth]);
 
+  const navigate = useNavigate();
+
   const combineBidData = async (bidDataArray: BidDataType[]) => {
     try {
       setLoading(true);
@@ -171,8 +193,147 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     }
   };
 
+  const handleOpenClick = async (gameData: BidDataType[]) => {
+    try {
+      setLoading(true);
+      const dbREf = ref(database, "FIREBASE CONFIGURATIONS");
+
+      const dbSnapshot = await get(dbREf);
+
+      const bidDetailsArray: MarketDetailsType[] = [];
+      const promises: Promise<void>[] = [];
+
+      gameData.forEach((game) => {
+        dbSnapshot.forEach((snapshot) => {
+          if (snapshot.val().name === game.appName) {
+            const firebaseConfig1 = snapshot.val();
+
+            const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
+
+            const database1 = getDatabase(app1);
+            console.log(game.gameKey);
+            const dataRef = ref(
+              database1,
+              `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/OPEN`
+            );
+
+            const promise2 = get(dataRef).then((marketType) => {
+              if (marketType.exists()) {
+                marketType.forEach((gameName) => {
+                  const marketName = gameName.key || "";
+                  const numbers: { [number: string]: number } = {};
+                  let marketTotalPoints = 0;
+
+                  gameName.forEach((numberSnapshot) => {
+                    if (numberSnapshot.exists()) {
+                      const number = numberSnapshot.key;
+                      const points = numberSnapshot.val().POINTS || 0;
+
+                      marketTotalPoints += points;
+
+                      numbers[number] = points;
+                    }
+                  });
+
+                  bidDetailsArray.push({
+                    appName: game.appName,
+                    marketName: marketName,
+                    numbers: numbers,
+                    marketTotalPoints: marketTotalPoints,
+                  });
+                });
+              }
+            });
+            promises.push(promise2);
+          }
+        });
+      });
+
+      const sortOrder = [
+        "Single Digit",
+        "Jodi Digit",
+        "Single Panel",
+        "Double Panel",
+        "Triple Panel",
+        "Half Sangam",
+        "Full Sangam",
+      ];
+
+      bidDetailsArray.sort(
+        (a, b) =>
+          sortOrder.indexOf(a.marketName) - sortOrder.indexOf(b.marketName)
+      );
+
+      // Wait for all promises to resolve
+      await Promise.all(promises);
+
+      // Once all promises are resolved and bidDetails is populated, set the state
+      setbidDetails(bidDetailsArray);
+      const combineBidData = await combineBidDetails(bidDetailsArray);
+      setCombineBidData(combineBidData);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+      navigate("/bidData/OPEN");
+    }
+  };
+
+  const handleCloseClick = async (gameData: BidDataType[]) => {
+    console.log(gameData);
+  };
+
+  const combineBidDetails = async (bidDetailsArray: MarketDetailsType[]) => {
+    const marketMap = new Map<string, CombineBidDataType>();
+
+    bidDetailsArray.forEach(
+      ({ appName, marketName, numbers, marketTotalPoints }) => {
+        if (marketMap.has(marketName)) {
+          const existingMarket = marketMap.get(marketName)!;
+          Object.keys(numbers).forEach((number) => {
+            existingMarket.numbers[number] =
+              (existingMarket.numbers[number] || 0) + numbers[number];
+          });
+          // Add appName to the existing market's appName array
+          existingMarket.appName.push(appName); // <- Change here
+          // Update marketTotalPoints
+          existingMarket.marketTotalPoints += marketTotalPoints;
+        } else {
+          // Add a new market to the map
+          marketMap.set(marketName, {
+            appName: [appName], // Array of appNames
+            marketName: marketName,
+            numbers: { ...numbers }, // Clone numbers object
+            marketTotalPoints: marketTotalPoints,
+          });
+        }
+      }
+    );
+
+    // Convert the map values back to an array
+    const arrangedMarketData = Array.from(marketMap.values());
+
+    const sortOrder = [
+      "Single Digit",
+      "Jodi Digit",
+      "Single Panel",
+      "Double Panel",
+      "Triple Panel",
+      "Half Sangam",
+      "Full Sangam",
+    ];
+
+    arrangedMarketData.sort(
+      (a, b) =>
+        sortOrder.indexOf(a.marketName) - sortOrder.indexOf(b.marketName)
+    );
+    return arrangedMarketData;
+  };
+
   console.log(combineBid);
   console.log(bidData);
+  console.log(bidDetails);
+  console.log(combinebidData);
 
   return (
     <div>
@@ -196,10 +357,18 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                         <th scope="col" className="px-6 py-3">
                           APP
                         </th>
-                        <th scope="col" className="px-6 py-3">
+                        <th
+                          scope="col"
+                          className="px-6 py-3 cursor-pointer"
+                          onClick={() => handleOpenClick(data.gameData)}
+                        >
                           OPEN
                         </th>
-                        <th scope="col" className="px-6 py-3">
+                        <th
+                          scope="col"
+                          className="px-6 py-3 cursor-pointer"
+                          onClick={() => handleCloseClick(data.gameData)}
+                        >
                           CLOSE
                         </th>
                         <th scope="col" className="px-6 py-3">

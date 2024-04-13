@@ -10,6 +10,8 @@ import Login from "./pages/login/Login";
 import "./styles/global.scss";
 import Profile from "./pages/Profile/Profile";
 import BidDataPage from "./pages/BidDataPage/BidDataPage";
+import BidDataDetailsPage from "./pages/BidDataPage/BidDataDetailsPage";
+import { BidDetailsProvider } from "./components/BidData/BidDetailsContext";
 
 const router = createBrowserRouter([
   {
@@ -36,6 +38,10 @@ const router = createBrowserRouter([
         path: "/bidData",
         element: <BidDataPage />,
       },
+      {
+        path: "/bidData/:id",
+        element: <BidDataDetailsPage />,
+      },
     ],
   },
 ]);
@@ -45,8 +51,9 @@ function App() {
     <>
       <AuthProvider>
         <ToastContainer />
-
-        <RouterProvider router={router} />
+        <BidDetailsProvider>
+          <RouterProvider router={router} />
+        </BidDetailsProvider>
       </AuthProvider>
     </>
   );
