@@ -253,7 +253,7 @@ const ConfigInput = () => {
                     value={config.name}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none outline-none focus:ring-offset-0 sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
                 <div className="">
@@ -266,7 +266,7 @@ const ConfigInput = () => {
                     value={config.apiKey}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none outline-none focus:ring-offset-0 sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
                 <div className="">
@@ -279,7 +279,8 @@ const ConfigInput = () => {
                     value={config.authDomain}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
+                    style={{ outline: "none" }}
                   />
                 </div>
                 <div>
@@ -292,7 +293,7 @@ const ConfigInput = () => {
                     value={config.databaseURL}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
 
@@ -306,7 +307,7 @@ const ConfigInput = () => {
                     value={config.projectId}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
                 <div>
@@ -319,7 +320,7 @@ const ConfigInput = () => {
                     value={config.storageBucket}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
                 <div>
@@ -333,7 +334,7 @@ const ConfigInput = () => {
                     value={config.messagingSenderId}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
                 <div>
@@ -346,7 +347,7 @@ const ConfigInput = () => {
                     value={config.appId}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
                 <div>
@@ -358,7 +359,7 @@ const ConfigInput = () => {
                     name="measurementId"
                     value={config.measurementId}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
                 <div>
@@ -371,13 +372,13 @@ const ConfigInput = () => {
                     value={config.authorizationKey}
                     onChange={handleChange}
                     required
-                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none sm:text-sm"
+                    className="mt-1 p-2 w-full rounded-sm border border-gray-300 shadow-sm outline-none focus:ring-0 focus:ring-offset-0 sm:text-sm"
                   />
                 </div>
               </div>
               <button
                 type="submit"
-                className="w-full mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-xs font-medium rounded-sm text-white bg-[#F05387] hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-xs font-medium rounded-sm text-white bg-[#F05387] hover:bg-indigo-700 focus:outline-none"
               >
                 Submit
               </button>

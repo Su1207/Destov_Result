@@ -39,6 +39,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: "hidden",
+  background: "#343a40",
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
@@ -47,6 +48,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: "hidden",
+  background: "#343a40",
   width: `calc(${theme.spacing(7)} + 1px)`,
   [theme.breakpoints.up("sm")]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
@@ -91,6 +93,7 @@ const Drawer1 = styled(MuiDrawer, {
   flexShrink: 0,
   whiteSpace: "nowrap",
   boxSizing: "border-box",
+  background: "#343a40",
   ...(open && {
     ...openedMixin(theme),
     "& .MuiDrawer-paper": openedMixin(theme),
@@ -144,17 +147,21 @@ const Layout = (props: Props) => {
   };
 
   const drawer = (
-    <div className=" lg:hidden">
+    <div className=" lg:hidden bg-[#343a40] h-full">
       {/* <Toolbar /> */}
-      <div>
+      <Link
+        to={"/"}
+        className="cursor-pointer"
+        onClick={() => setMobileOpen(false)}
+      >
         <Typography
           variant="h5"
           noWrap
           className="px-4 py-8 flex justify-center w-full text-[#F05387] font-bold"
         >
-          Destov Tech
+          Master Admin
         </Typography>
-      </div>
+      </Link>
       <List>
         {["Market", "Bid Data", "Setting"].map((text, index) => (
           <ListItem
@@ -168,7 +175,7 @@ const Layout = (props: Props) => {
             component={Link} // Use Link component from react-router-dom
             to={index === 0 ? "/" : index === 1 ? "/bidData" : "/setting"} // Define the route to navigate to
           >
-            <ListItemButton>
+            <ListItemButton onClick={() => setMobileOpen(false)}>
               <ListItemIcon sx={{ color: "white" }}>
                 {index === 0 ? (
                   <StorefrontIcon />
@@ -196,7 +203,7 @@ const Layout = (props: Props) => {
   return (
     <div className="overflow-x-hidden w-full">
       {isAuthenticated ? (
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full appearance-none">
           <Box sx={{ display: "flex", width: "100%" }}>
             <CssBaseline />
             <div className=" hidden lg:block">
@@ -270,7 +277,7 @@ const Layout = (props: Props) => {
                     component="div"
                     className=" flex justify-center w-full text-[#F05387] font-bold"
                   >
-                    Destov Tech
+                    Master Admin
                   </Typography>
                   <IconButton
                     onClick={handleDrawerClose}
@@ -338,12 +345,13 @@ const Layout = (props: Props) => {
                 </List>
               </Drawer1>
             </div>
-            <div className="lg:hidden">
+            <div className="lg:hidden bg-[#343a40]">
               <AppBar
                 position="fixed"
                 sx={{
                   width: { lg: `calc(100% - ${drawerWidth}px)` },
                   ml: { lg: `${drawerWidth}px` },
+                  background: "#343a40",
                 }}
               >
                 <Toolbar>
@@ -397,7 +405,11 @@ const Layout = (props: Props) => {
               </AppBar>
               <Box
                 component="nav"
-                sx={{ width: { lg: drawerWidth }, flexShrink: { lg: 0 } }}
+                sx={{
+                  width: { lg: drawerWidth },
+                  flexShrink: { lg: 0 },
+                  background: "#343a40",
+                }}
                 aria-label="mailbox folders"
               >
                 {/* The implementation can be swapped with js to avoid SEO duplication of links. */}

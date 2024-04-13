@@ -4,6 +4,8 @@ import { database } from "../../firebase";
 import { get, getDatabase, ref } from "firebase/database";
 import { initializeApp } from "firebase/app";
 import RelatedUserDetails from "./RelatedUserDetails";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import { Link } from "react-router-dom";
 
 export type UserDetailsType = {
   [appName: string]: SingleUserDetail[];
@@ -20,6 +22,19 @@ export type ClickPosition = {
   y: number;
 };
 
+const currentFormattedDate = () => {
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+  const date = currentDate.getDate().toString().padStart(2, "0");
+  const hours = (currentDate.getHours() % 12 || 12).toString().padStart(2, "0");
+  const min = currentDate.getMinutes().toString().padStart(2, "0");
+  const sec = currentDate.getSeconds().toString().padStart(2, "0");
+  const meridiem = currentDate.getHours() >= 12 ? "PM" : "AM";
+
+  return `${date}-${month}-${year} | ${hours}:${min}:${sec} ${meridiem}`;
+};
+
 const BidDetails: React.FC<{ gameType: string | undefined }> = ({
   gameType,
 }) => {
@@ -30,6 +45,10 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
     null
   );
   const [bidNumber, setBidNnumber] = useState("");
+  const [isEditorVisible, setIsEditorVisible] = useState(false);
+
+  const [formattedText, setFormattedText] = useState<any>(""); // Declare formattedText as state
+
   const [loading, setLoading] = useState(false);
   const [userBidData, setUserBidData] = useState<UserDetailsType>({});
   const [date, month, year] = [value?.date(), value?.month(), value?.year()];
@@ -101,9 +120,9 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
 
             const userDetails = ref(
               database1,
-              `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${gameKey}/${gameType}/${marketName}/${
-                row.split(" = ")[0]
-              }/USERS`
+              `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${gameKey}/${
+                gameType?.split(":")[0]
+              }/${marketName}/${row.split(" = ")[0]}/USERS`
             );
 
             const promise1 = get(userDetails).then((userSnapshot) => {
@@ -144,14 +163,73 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
       setTimeout(() => {
         setUserBidData(userData);
         setLoading(false);
-      }, 1000);
+      }, 300);
       setClickPosition({ x, y });
     } catch (er) {
       console.log(er);
     }
   };
 
-  console.log(userBidData);
+  const handleCopyToClipboard = async () => {
+    // Construct the formatted text
+    let newFormattedText = `✦ ${gameType?.split(":")[1]} (${
+      gameType?.split(":")[0]
+    }) : ${totalPoints} ₹ ✦\n\nDate : ${currentFormattedDate()}\n\n`;
+
+    const gameTypes = [
+      "Single Digit",
+      "Jodi Digit",
+      "Single Panel",
+      "Double Panel",
+      "Triple Panel",
+      "Half Sangam",
+      "Full Sangam",
+    ];
+
+    gameTypes.forEach((type) => {
+      const gameDetails = combinebidData.find(
+        (detail) => detail.marketName === type
+      );
+
+      if (gameDetails) {
+        newFormattedText += `${type} : ${gameDetails.marketTotalPoints} ₹\n`;
+      }
+    });
+
+    gameTypes.forEach((type) => {
+      const gameDetails = combinebidData.find(
+        (detail) => detail.marketName === type
+      );
+
+      if (gameDetails) {
+        newFormattedText += `\n✦ ${type} ✦\n\n`;
+        Object.entries(gameDetails.numbers).forEach(([number, points]) => {
+          newFormattedText += `${number}=${points} ₹\n`;
+        });
+        newFormattedText += `--------------------\nTotal = ${gameDetails.marketTotalPoints}\n--------------------\n\n`;
+      }
+    });
+
+    // Update the state
+    setFormattedText(newFormattedText);
+
+    try {
+      // Use the updated state value directly inside the writeText callback
+      await navigator.clipboard.writeText(newFormattedText);
+      // Provide feedback to the user, e.g., toast message
+      alert("Copied to clipboard!");
+      //   console.log(formattedText);
+      toggleEditor();
+    } catch (error) {
+      console.error("Error copying to clipboard:", error);
+    }
+  };
+
+  const toggleEditor = () => {
+    setIsEditorVisible(!isEditorVisible);
+  };
+
+  console.log(formattedText);
 
   return (
     <div>
@@ -164,11 +242,44 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
           clickPosition={clickPosition}
         />
       )}
-      <div className={`${open ? "lg:w-[78%]" : "lg:w-[95%]"} `}>
+      <div className={`${open ? "lg:w-[76%] xl:min-w-[82%]" : "lg:w-[100%]"} `}>
         {combinebidData && combinebidData.length > 0 ? (
           <>
+            <div className="flex items-center text-2xl font-bold mb-4">
+              <Link to={"/bidData"} className="hover:text-[#F05387]">
+                <ChevronLeftIcon sx={{ fontSize: "25px" }} />
+              </Link>
+              <div>
+                {gameType?.split(":")[1]}{" "}
+                <span className="text-sm font-semibold">
+                  ({gameType?.split(":")[0]})
+                </span>
+              </div>
+            </div>
+            <div className="border p-4 rounded-md shadow-lg bg-gray-200 w-96">
+              {combinebidData.map((data, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div className=" text-sm">{data.marketName}</div>
+                  <div className="text-sm">
+                    {data.marketTotalPoints} &#8377;
+                  </div>
+                </div>
+              ))}
+              <div className="flex justify-between items-center font-semibold">
+                <div className="text-sm">Total</div>
+                <div className="text-sm">{totalPoints} &#8377;</div>
+              </div>
+              <div className="flex justify-center items-center">
+                <button
+                  onClick={handleCopyToClipboard}
+                  className="px-4 py-2 text-white text-xs rounded-sm bg-black hover:font-semibold hover:bg-[#F05387] transition-all duration-300 ease-in-out"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
             <div className=" flex justify-end mb-2">
-              <div className="border rounded-sm p-2 bg-gray-200 text-sm font-semibold">
+              <div className="border rounded-sm p-2 shadow-md bg-gray-200 text-sm font-semibold">
                 Total = {totalPoints} ₹
               </div>
             </div>

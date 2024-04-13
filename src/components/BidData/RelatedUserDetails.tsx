@@ -42,7 +42,7 @@ const RelatedUserDetails: React.FC<UserDetailsProps> = ({
           >
             <ClearIcon />
           </div>
-          <div className="mb-4 text-xl font-bold">
+          <div className="mb-4 text-lg sm:text-xl font-bold">
             User Details
             <span className="ml-2 text-sm font-medium">
               (BID - {bidNumber})

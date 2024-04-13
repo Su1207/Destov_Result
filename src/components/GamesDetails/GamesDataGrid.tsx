@@ -86,7 +86,7 @@ const GamesDataGrid: React.FC<gameDataGridProps> = ({ gameData }) => {
     {
       field: "app",
       headerName: "App",
-      width: 300,
+      width: 400,
     },
   ];
 

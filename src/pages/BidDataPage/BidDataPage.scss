@@ -19,15 +19,19 @@
   }
 }
 
-.MuiFormControl-root {
-  min-width: 110px !important;
-  max-width: 110px;
-}
+.bidDataPage {
+  .MuiFormControl-root {
+    min-width: 110px !important;
+    max-width: 110px;
+  }
 
-.MuiInputBase-root {
-  padding: 0 !important;
-}
+  .MuiInputBase-root {
+    padding: 0 !important;
+  }
 
-.MuiInputBase-input {
-  padding: 8px !important;
+  .MuiInputBase-input {
+    padding: 8px !important;
+    outline: none !important;
+    border: none !important;
+  }
 }

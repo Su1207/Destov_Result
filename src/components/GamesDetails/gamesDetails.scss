@@ -34,11 +34,6 @@
       align-items: center;
       justify-content: center;
     }
-
-    .phone-column {
-      justify-content: flex-start !important;
-      padding-left: 0.8rem;
-    }
   }
 
   .MuiDataGrid-columnHeaderDraggableContainer {
@@ -74,6 +69,10 @@
       flex-direction: column-reverse;
       align-items: flex-start;
     }
+
+    .MuiFormControl-root {
+      max-width: 220px !important;
+    }
   }
 
   // @include sm {
@@ -86,52 +85,5 @@
     @include sm {
       font-size: 1rem;
     }
-  }
-
-  .actions_icons {
-    display: flex;
-    align-items: center;
-    gap: 2.5rem;
-
-    &:focus {
-      outline: none;
-    }
-  }
-}
-
-.addPointsImage,
-.withdrawPointsImage {
-  height: 30px;
-  width: 30px;
-  object-fit: cover;
-  object-position: center;
-  cursor: pointer;
-}
-
-.user_name {
-  text-transform: capitalize;
-}
-
-.phone_column {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-
-  .version {
-    padding: 10px 5px;
-    background: rgb(231, 176, 186);
-    color: rgb(202, 4, 4);
-    font-size: 0.6rem;
-    font-weight: 600;
-    border-radius: 2px;
-  }
-
-  .latest {
-    padding: 10px 5px;
-    background: rgb(157, 244, 157);
-    color: green;
-    font-size: 0.6rem;
-    font-weight: 600;
-    border-radius: 2px;
   }
 }

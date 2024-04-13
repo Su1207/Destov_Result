@@ -145,7 +145,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
             combineBidData(bidDataArray);
 
             setLoading(false);
-          }, 3000); // A
+          }, 700); // A
           // Set the bid data after all promises have resolved
           setBidData(bidDataArray);
         }
@@ -194,7 +194,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     }
   };
 
-  const handleOpenClick = async (gameData: BidDataType[]) => {
+  const handleOpenClick = async (gameData: BidDataType[], gameName: string) => {
     try {
       setLoading(true);
       const dbREf = ref(database, "FIREBASE CONFIGURATIONS");
@@ -278,11 +278,14 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       console.log(err);
     } finally {
       setLoading(false);
-      navigate("/bidData/OPEN");
+      navigate(`/bidData/OPEN:${gameName}`);
     }
   };
 
-  const handleCloseClick = async (gameData: BidDataType[]) => {
+  const handleCloseClick = async (
+    gameData: BidDataType[],
+    gameName: string
+  ) => {
     try {
       setLoading(true);
       const dbREf = ref(database, "FIREBASE CONFIGURATIONS");
@@ -366,7 +369,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       console.log(err);
     } finally {
       setLoading(false);
-      navigate("/bidData/CLOSE");
+      navigate(`/bidData/CLOSE:${gameName}`);
     }
   };
 
@@ -442,14 +445,18 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                         <th
                           scope="col"
                           className="px-6 py-3 cursor-pointer"
-                          onClick={() => handleOpenClick(data.gameData)}
+                          onClick={() =>
+                            handleOpenClick(data.gameData, data.gameName)
+                          }
                         >
                           OPEN
                         </th>
                         <th
                           scope="col"
                           className="px-6 py-3 cursor-pointer"
-                          onClick={() => handleCloseClick(data.gameData)}
+                          onClick={() =>
+                            handleCloseClick(data.gameData, data.gameName)
+                          }
                         >
                           CLOSE
                         </th>

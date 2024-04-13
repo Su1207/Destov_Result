@@ -31,7 +31,7 @@ const BidDataPage = () => {
   //   };
 
   return (
-    <div>
+    <div className="bidDataPage">
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DemoContainer components={["MobileDatePicker"]}>
           <DemoItem>
