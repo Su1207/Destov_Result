@@ -204,49 +204,51 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       const promises: Promise<void>[] = [];
 
       gameData.forEach((game) => {
-        dbSnapshot.forEach((snapshot) => {
-          if (snapshot.val().name === game.appName) {
-            const firebaseConfig1 = snapshot.val();
+        if (game.openTotal !== 0) {
+          dbSnapshot.forEach((snapshot) => {
+            if (snapshot.val().name === game.appName) {
+              const firebaseConfig1 = snapshot.val();
 
-            const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
+              const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
 
-            const database1 = getDatabase(app1);
-            console.log(game.gameKey);
-            const dataRef = ref(
-              database1,
-              `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/OPEN`
-            );
+              const database1 = getDatabase(app1);
+              console.log(game.gameKey);
+              const dataRef = ref(
+                database1,
+                `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/OPEN`
+              );
 
-            const promise2 = get(dataRef).then((marketType) => {
-              if (marketType.exists()) {
-                marketType.forEach((gameName) => {
-                  const marketName = gameName.key || "";
-                  const numbers: { [number: string]: number } = {};
-                  let marketTotalPoints = 0;
+              const promise2 = get(dataRef).then((marketType) => {
+                if (marketType.exists()) {
+                  marketType.forEach((gameName) => {
+                    const marketName = gameName.key || "";
+                    const numbers: { [number: string]: number } = {};
+                    let marketTotalPoints = 0;
 
-                  gameName.forEach((numberSnapshot) => {
-                    if (numberSnapshot.exists()) {
-                      const number = numberSnapshot.key;
-                      const points = numberSnapshot.val().POINTS || 0;
+                    gameName.forEach((numberSnapshot) => {
+                      if (numberSnapshot.exists()) {
+                        const number = numberSnapshot.key;
+                        const points = numberSnapshot.val().POINTS || 0;
 
-                      marketTotalPoints += points;
+                        marketTotalPoints += points;
 
-                      numbers[number] = points;
-                    }
+                        numbers[number] = points;
+                      }
+                    });
+
+                    bidDetailsArray.push({
+                      appName: game.appName,
+                      marketName: marketName,
+                      numbers: numbers,
+                      marketTotalPoints: marketTotalPoints,
+                    });
                   });
-
-                  bidDetailsArray.push({
-                    appName: game.appName,
-                    marketName: marketName,
-                    numbers: numbers,
-                    marketTotalPoints: marketTotalPoints,
-                  });
-                });
-              }
-            });
-            promises.push(promise2);
-          }
-        });
+                }
+              });
+              promises.push(promise2);
+            }
+          });
+        }
       });
 
       const sortOrder = [
@@ -290,49 +292,51 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       const promises: Promise<void>[] = [];
 
       gameData.forEach((game) => {
-        dbSnapshot.forEach((snapshot) => {
-          if (snapshot.val().name === game.appName) {
-            const firebaseConfig1 = snapshot.val();
+        if (game.closeTotal !== 0) {
+          dbSnapshot.forEach((snapshot) => {
+            if (snapshot.val().name === game.appName) {
+              const firebaseConfig1 = snapshot.val();
 
-            const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
+              const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
 
-            const database1 = getDatabase(app1);
-            console.log(game.gameKey);
-            const dataRef = ref(
-              database1,
-              `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/CLOSE`
-            );
+              const database1 = getDatabase(app1);
+              console.log(game.gameKey);
+              const dataRef = ref(
+                database1,
+                `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/CLOSE`
+              );
 
-            const promise2 = get(dataRef).then((marketType) => {
-              if (marketType.exists()) {
-                marketType.forEach((gameName) => {
-                  const marketName = gameName.key || "";
-                  const numbers: { [number: string]: number } = {};
-                  let marketTotalPoints = 0;
+              const promise2 = get(dataRef).then((marketType) => {
+                if (marketType.exists()) {
+                  marketType.forEach((gameName) => {
+                    const marketName = gameName.key || "";
+                    const numbers: { [number: string]: number } = {};
+                    let marketTotalPoints = 0;
 
-                  gameName.forEach((numberSnapshot) => {
-                    if (numberSnapshot.exists()) {
-                      const number = numberSnapshot.key;
-                      const points = numberSnapshot.val().POINTS || 0;
+                    gameName.forEach((numberSnapshot) => {
+                      if (numberSnapshot.exists()) {
+                        const number = numberSnapshot.key;
+                        const points = numberSnapshot.val().POINTS || 0;
 
-                      marketTotalPoints += points;
+                        marketTotalPoints += points;
 
-                      numbers[number] = points;
-                    }
+                        numbers[number] = points;
+                      }
+                    });
+
+                    bidDetailsArray.push({
+                      appName: game.appName,
+                      marketName: marketName,
+                      numbers: numbers,
+                      marketTotalPoints: marketTotalPoints,
+                    });
                   });
-
-                  bidDetailsArray.push({
-                    appName: game.appName,
-                    marketName: marketName,
-                    numbers: numbers,
-                    marketTotalPoints: marketTotalPoints,
-                  });
-                });
-              }
-            });
-            promises.push(promise2);
-          }
-        });
+                }
+              });
+              promises.push(promise2);
+            }
+          });
+        }
       });
 
       const sortOrder = [
