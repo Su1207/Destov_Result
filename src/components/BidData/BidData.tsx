@@ -40,10 +40,10 @@ interface BidDataProps {
 }
 
 const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
-  const { bidDetails, setbidDetails } = useBidDetailsContext();
+  const { setbidDetails } = useBidDetailsContext();
 
   const [bidData, setBidData] = useState<BidDataType[] | null>(null);
-  const { combinebidData, setCombineBidData } = useBidDetailsContext();
+  const { setCombineBidData } = useBidDetailsContext();
 
   const [loading, setLoading] = useState(false);
   const [combineBid, setCombineBid] = useState<CombineBidType[]>();
@@ -54,7 +54,8 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       ? (month + 1)?.toString().padStart(2, "0")
       : "";
 
-  console.log(newDate, newMonth, year);
+  // console.log(newDate, newMonth, year);
+  console.log(bidData);
 
   useEffect(() => {
     const fetchBidData = async () => {
@@ -237,7 +238,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                     });
 
                     bidDetailsArray.push({
-                      appName: game.appName,
+                      appName: `${game.appName}:${game.gameKey}`,
                       marketName: marketName,
                       numbers: numbers,
                       marketTotalPoints: marketTotalPoints,
@@ -325,7 +326,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                     });
 
                     bidDetailsArray.push({
-                      appName: game.appName,
+                      appName: `${game.appName}:${game.gameKey}`,
                       marketName: marketName,
                       numbers: numbers,
                       marketTotalPoints: marketTotalPoints,
@@ -415,11 +416,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     );
     return arrangedMarketData;
   };
-
-  console.log(combineBid);
-  console.log(bidData);
-  console.log(bidDetails);
-  console.log(combinebidData);
 
   return (
     <div>
