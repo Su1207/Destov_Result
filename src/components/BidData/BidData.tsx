@@ -280,7 +280,89 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
   };
 
   const handleCloseClick = async (gameData: BidDataType[]) => {
-    console.log(gameData);
+    try {
+      setLoading(true);
+      const dbREf = ref(database, "FIREBASE CONFIGURATIONS");
+
+      const dbSnapshot = await get(dbREf);
+
+      const bidDetailsArray: MarketDetailsType[] = [];
+      const promises: Promise<void>[] = [];
+
+      gameData.forEach((game) => {
+        dbSnapshot.forEach((snapshot) => {
+          if (snapshot.val().name === game.appName) {
+            const firebaseConfig1 = snapshot.val();
+
+            const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
+
+            const database1 = getDatabase(app1);
+            console.log(game.gameKey);
+            const dataRef = ref(
+              database1,
+              `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/CLOSE`
+            );
+
+            const promise2 = get(dataRef).then((marketType) => {
+              if (marketType.exists()) {
+                marketType.forEach((gameName) => {
+                  const marketName = gameName.key || "";
+                  const numbers: { [number: string]: number } = {};
+                  let marketTotalPoints = 0;
+
+                  gameName.forEach((numberSnapshot) => {
+                    if (numberSnapshot.exists()) {
+                      const number = numberSnapshot.key;
+                      const points = numberSnapshot.val().POINTS || 0;
+
+                      marketTotalPoints += points;
+
+                      numbers[number] = points;
+                    }
+                  });
+
+                  bidDetailsArray.push({
+                    appName: game.appName,
+                    marketName: marketName,
+                    numbers: numbers,
+                    marketTotalPoints: marketTotalPoints,
+                  });
+                });
+              }
+            });
+            promises.push(promise2);
+          }
+        });
+      });
+
+      const sortOrder = [
+        "Single Digit",
+        "Jodi Digit",
+        "Single Panel",
+        "Double Panel",
+        "Triple Panel",
+        "Half Sangam",
+        "Full Sangam",
+      ];
+
+      bidDetailsArray.sort(
+        (a, b) =>
+          sortOrder.indexOf(a.marketName) - sortOrder.indexOf(b.marketName)
+      );
+
+      // Wait for all promises to resolve
+      await Promise.all(promises);
+
+      // Once all promises are resolved and bidDetails is populated, set the state
+      setbidDetails(bidDetailsArray);
+      const combineBidData = await combineBidDetails(bidDetailsArray);
+      setCombineBidData(combineBidData);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+      navigate("/bidData/CLOSE");
+    }
   };
 
   const combineBidDetails = async (bidDetailsArray: MarketDetailsType[]) => {
