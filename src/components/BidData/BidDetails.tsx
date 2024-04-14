@@ -256,7 +256,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                 </span>
               </div>
             </div>
-            <div className="border p-4 rounded-md shadow-lg bg-gray-200 w-96">
+            <div className="border p-4 rounded-md shadow-lg bg-gray-200 w-auto mb-4 sm:w-96">
               {combinebidData.map((data, index) => (
                 <div key={index} className="flex justify-between items-center">
                   <div className=" text-sm">{data.marketName}</div>
@@ -278,7 +278,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                 </button>
               </div>
             </div>
-            <div className=" flex justify-end mb-2">
+            <div className=" flex justify-end mb-4">
               <div className="border rounded-sm p-2 shadow-md bg-gray-200 text-sm font-semibold">
                 Total = {totalPoints} ₹
               </div>

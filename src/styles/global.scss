@@ -12,6 +12,13 @@
   display: none;
 }
 
+html {
+  caret-color: transparent !important;
+  outline: none !important;
+  cursor: default;
+  scroll-behavior: smooth;
+}
+
 .admin-column {
   .arrow-icon {
     transition: transform 0.3s ease-in-out;

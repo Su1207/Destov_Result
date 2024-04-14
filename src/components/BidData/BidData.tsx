@@ -370,6 +370,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     } finally {
       setLoading(false);
       navigate(`/bidData/CLOSE:${gameName}`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
