@@ -13,10 +13,14 @@
 }
 
 html {
-  caret-color: transparent !important;
+  caret-color: transparent;
   outline: none !important;
   cursor: default;
   scroll-behavior: smooth;
+}
+
+input {
+  caret-color: auto !important;
 }
 
 .admin-column {
