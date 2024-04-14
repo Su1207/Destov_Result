@@ -19,9 +19,12 @@
     "dayjs": "^1.11.10",
     "firebase": "^10.8.1",
     "flowbite-react": "^0.8.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
+    "react-to-print": "^2.15.1",
     "react-toastify": "^10.0.5"
   },
   "devDependencies": {

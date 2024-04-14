@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBidDetailsContext } from "./BidDetailsContext";
 import { database } from "../../firebase";
 import { get, getDatabase, ref } from "firebase/database";
@@ -6,6 +6,7 @@ import { initializeApp } from "firebase/app";
 import RelatedUserDetails from "./RelatedUserDetails";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Link } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
 
 export type UserDetailsType = {
   [appName: string]: SingleUserDetail[];
@@ -225,11 +226,47 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
     }
   };
 
+  console.log(formattedText);
+
   const toggleEditor = () => {
     setIsEditorVisible(!isEditorVisible);
   };
 
-  console.log(formattedText);
+  const componentRef = useRef(null);
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
+  const handleDownloadCSV = () => {
+    // Select the table element by its ID or any other suitable selector
+    const table = document.getElementById("table-id");
+
+    if (!table) {
+      console.error("Table not found");
+      return;
+    }
+
+    // Extract table rows and cells
+    const rows = table.querySelectorAll("tr");
+
+    // Extract data from each cell and build CSV content
+    const csvContent = Array.from(rows, (row) => {
+      const cells = row.querySelectorAll("td, th");
+      return Array.from(cells, (cell) => cell.textContent?.trim()).join(",");
+    }).join("\n");
+
+    // Create a blob with CSV content
+    const blob = new Blob([csvContent], { type: "text/csv" });
+
+    // Create a link element to trigger download
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "table.csv";
+
+    // Trigger the download
+    link.click();
+  };
 
   return (
     <div>
@@ -272,19 +309,41 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
               <div className="flex justify-center items-center">
                 <button
                   onClick={handleCopyToClipboard}
-                  className="px-4 py-2 text-white text-xs rounded-sm bg-black hover:font-semibold hover:bg-[#F05387] transition-all duration-300 ease-in-out"
+                  className="px-4 py-2 text-white text-xs rounded-sm bg-black hover:font-semibold hover:bg-[#FAA912] transition-all duration-300 ease-in-out"
                 >
                   Copy
                 </button>
               </div>
             </div>
-            <div className=" flex justify-end mb-4">
-              <div className="border rounded-sm p-2 shadow-md bg-gray-200 text-sm font-semibold">
+            <div className=" flex justify-center xs:justify-end gap-2 mb-4">
+              <div className="border rounded-sm p-2 hover:bg-[#FAA912] shadow-md bg-gray-200 text-xs xs:text-sm font-normal transition-all duration-300 ease-in-out hover:font-semibold">
+                <button
+                  onClick={handleDownloadCSV}
+                  className=" outline-none border-none "
+                >
+                  Download as CSV
+                </button>
+              </div>
+              <div className="border rounded-sm py-2 px-4 hover:bg-[#FAA912] shadow-md bg-gray-200 text-xs xs:text-sm font-normal transition-all duration-300 ease-in-out hover:font-semibold">
+                <button
+                  onClick={handlePrint}
+                  className=" outline-none border-none"
+                >
+                  Print
+                </button>
+              </div>
+              <div className="border rounded-sm p-2 shadow-md bg-gray-200 text-xs xs:text-sm font-semibold hover:bg-[#FAA912] transition-all duration-300 ease-in-out">
                 Total = {totalPoints} ₹
               </div>
             </div>
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg mb-8">
-              <table className="w-full text-sm text-left border rtl:text-right text-gray-500 dark:text-gray-400">
+            <div
+              ref={componentRef}
+              className="relative overflow-x-auto shadow-md sm:rounded-lg mb-8"
+            >
+              <table
+                id="table-id"
+                className="w-full text-sm text-left border rtl:text-right text-gray-500 dark:text-gray-400 px-4"
+              >
                 <thead className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                   <tr>
                     <th scope="col" className="px-2 py-3 text-center">
@@ -333,7 +392,9 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
             </div>
           </>
         ) : (
-          <div>No Data</div>
+          <div className="no-data">
+            <img src="/noData.gif" alt="" className="no-data-img" />
+          </div>
         )}
       </div>
     </div>

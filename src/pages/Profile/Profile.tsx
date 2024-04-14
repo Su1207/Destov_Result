@@ -103,7 +103,7 @@ const Profile = () => {
             </div>
             <button
               type="submit"
-              className="w-full mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-xs font-medium rounded-sm text-white bg-[#F05387] hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="w-full mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-xs font-medium rounded-sm text-white bg-[#FAA912] hover:bg-black focus:outline-none transition-all duration-300 ease-in-out"
             >
               Submit
             </button>

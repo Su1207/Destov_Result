@@ -157,7 +157,7 @@ const Layout = (props: Props) => {
         <Typography
           variant="h5"
           noWrap
-          className="px-4 py-8 flex justify-center w-full text-[#F05387] font-bold"
+          className="px-4 py-8 flex justify-center w-full text-[#FAA912] font-bold"
         >
           Master Admin
         </Typography>
@@ -169,7 +169,7 @@ const Layout = (props: Props) => {
             disablePadding
             sx={{
               display: "block",
-              "&:hover": { bgcolor: "#F05387" },
+              "&:hover": { bgcolor: "#FAA912" },
               transition: "all 0.3s ease-in-out",
             }}
             component={Link} // Use Link component from react-router-dom
@@ -196,15 +196,9 @@ const Layout = (props: Props) => {
     </div>
   );
 
-  const date = new Date().getDate();
-
   // Remove this const when copying and pasting into your project.
   const container =
     window !== undefined ? () => window().document.body : undefined;
-
-  React.useEffect(() => {
-    logout();
-  }, [date]);
 
   return (
     <div className="overflow-x-hidden w-full">
@@ -229,7 +223,7 @@ const Layout = (props: Props) => {
                       ...(open && { display: "none" }),
                     }}
                   >
-                    <MenuIcon sx={{ color: "#F05387" }} />
+                    <MenuIcon sx={{ color: "#FAA912" }} />
                   </IconButton>
 
                   <div className="w-full">
@@ -248,7 +242,7 @@ const Layout = (props: Props) => {
                         {adminClick && (
                           <div className=" rounded-b-sm shadow-lg absolute bg-[#343a40] text-white p-2 z-50 top-11 w-[130%] right-0">
                             <Link to={"/profile"}>
-                              <div className="mb-2 flex items-center gap-2 hover:text-[#F05387] text-sm">
+                              <div className="mb-2 flex items-center gap-2 hover:text-[#FAA912] text-sm">
                                 <PersonIcon
                                   sx={{ fontSize: "20px", marginLeft: "20px" }}
                                 />
@@ -256,7 +250,7 @@ const Layout = (props: Props) => {
                               </div>
                             </Link>
                             <div
-                              className="mb-2 flex items-center gap-2 hover:text-[#F05387] text-sm"
+                              className="mb-2 flex items-center gap-2 hover:text-[#FAA912] text-sm"
                               onClick={() => logout()}
                             >
                               <LogoutIcon
@@ -281,13 +275,13 @@ const Layout = (props: Props) => {
                     variant="h5"
                     noWrap
                     component="div"
-                    className=" flex justify-center w-full text-[#F05387] font-bold"
+                    className=" flex justify-center w-full text-[#FAA912] font-bold"
                   >
                     Master Admin
                   </Typography>
                   <IconButton
                     onClick={handleDrawerClose}
-                    sx={{ color: "#F05387" }}
+                    sx={{ color: "#FAA912" }}
                   >
                     {theme.direction === "rtl" ? (
                       <ChevronRightIcon />
@@ -304,7 +298,7 @@ const Layout = (props: Props) => {
                       disablePadding
                       sx={{
                         display: "block",
-                        "&:hover": { bgcolor: "#F05387" },
+                        "&:hover": { bgcolor: "#FAA912" },
                         transition: "all 0.3s ease-in-out",
                       }}
                       component={Link} // Use Link component from react-router-dom
@@ -386,7 +380,7 @@ const Layout = (props: Props) => {
                         {adminClick && (
                           <div className=" rounded-b-sm shadow-lg absolute bg-[#343a40] text-white p-2 z-50 top-10 w-[130%] right-0">
                             <Link to={"/profile"}>
-                              <div className="mb-2 flex items-center gap-2 hover:text-[#F05387] text-sm">
+                              <div className="mb-2 flex items-center gap-2 hover:text-[#FAA912] text-sm">
                                 <PersonIcon
                                   sx={{ fontSize: "20px", marginLeft: "20px" }}
                                 />
@@ -394,7 +388,7 @@ const Layout = (props: Props) => {
                               </div>
                             </Link>
                             <div
-                              className="mb-2 flex items-center gap-2 hover:text-[#F05387] text-sm"
+                              className="mb-2 flex items-center gap-2 hover:text-[#FAA912] text-sm"
                               onClick={() => logout()}
                             >
                               <LogoutIcon
@@ -472,7 +466,7 @@ const Layout = (props: Props) => {
 
               <div className=" mt-[4rem] flex items-center justify-center text-xs text-[#98a6ad]">
                 Copyright © 2023-2024 Made By
-                <span className=" text-[#F05387] ml-1">DestovTech</span>
+                <span className=" text-[#FAA912] ml-1">Master Admin</span>
               </div>
             </Box>
           </Box>
