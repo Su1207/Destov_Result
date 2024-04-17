@@ -494,7 +494,7 @@ const ConfigInput = () => {
                         </li> */}
                         </ul>{" "}
                       </div>
-                      <div className=" flex items-center gap-3 justify-end">
+                      <div className=" flex items-center gap-5 sm:gap-3 mt-4 sm:mt-2 justify-center sm:justify-end">
                         <div onClick={() => handleUpdate(index)}>
                           <RefreshIcon className="text-green-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
                         </div>
