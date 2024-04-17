@@ -60,6 +60,8 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
       ? (month + 1)?.toString().padStart(2, "0")
       : "";
 
+  console.log(combinebidData);
+
   useEffect(() => {
     let totalPoints = 0;
     combinebidData.map((data) => {
@@ -113,7 +115,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
         const appname = app.split(":")[0];
         const gameKey = app.split(":")[1];
         dbSnapshot.forEach((dbs) => {
-          if (dbs.val().name === appname) {
+          if (dbs.val().name === appname && !dbs.val().disable) {
             const firebaseConfig1 = dbs.val();
 
             const app1 = initializeApp(firebaseConfig1, `${appname}`);
@@ -269,7 +271,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
   };
 
   return (
-    <div>
+    <div className="">
       {clickedNumber && (
         <RelatedUserDetails
           loading={loading}
@@ -293,30 +295,35 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                 </span>
               </div>
             </div>
-            <div className="border p-4 rounded-md shadow-lg bg-gray-200 w-auto mb-4 sm:w-96">
+            <div className="border p-4 rounded-md shadow-lg bg-gradient-to-r from-[#8e2de2] to-[#4a00e0] text-white w-auto mb-4 sm:w-96">
               {combinebidData.map((data, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <div className=" text-sm">{data.marketName}</div>
-                  <div className="text-sm">
+                <div
+                  key={index}
+                  className="flex mb-1 justify-between items-center"
+                >
+                  <div className=" text-sm sm:text-base">{data.marketName}</div>
+                  <div className="text-sm sm:text-base">
                     {data.marketTotalPoints} &#8377;
                   </div>
                 </div>
               ))}
               <div className="flex justify-between items-center font-semibold">
-                <div className="text-sm">Total</div>
-                <div className="text-sm">{totalPoints} &#8377;</div>
+                <div className="text-sm sm:text-base">Total</div>
+                <div className="text-sm sm:text-base">
+                  {totalPoints} &#8377;
+                </div>
               </div>
               <div className="flex justify-center items-center">
                 <button
                   onClick={handleCopyToClipboard}
-                  className="px-4 py-2 text-white text-xs rounded-sm bg-black hover:font-semibold hover:bg-[#FAA912] transition-all duration-300 ease-in-out"
+                  className="px-4 py-2 text-white text-xs rounded-sm bg-blue-900 hover:font-semibold hover:bg-black transition-all duration-300 ease-in-out"
                 >
                   Copy
                 </button>
               </div>
             </div>
             <div className=" flex justify-center xs:justify-end gap-2 mb-4">
-              <div className="border rounded-sm p-2 hover:bg-[#FAA912] shadow-md bg-gray-200 text-xs xs:text-sm font-normal transition-all duration-300 ease-in-out hover:font-semibold">
+              <div className="border rounded-sm text-white p-2 hover:bg-[#FAA912] shadow-md bg-[#f09819] text-xs xs:text-sm font-medium transition-all duration-300 ease-in-out">
                 <button
                   onClick={handleDownloadCSV}
                   className=" outline-none border-none "
@@ -324,7 +331,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                   Download as CSV
                 </button>
               </div>
-              <div className="border rounded-sm py-2 px-4 hover:bg-[#FAA912] shadow-md bg-gray-200 text-xs xs:text-sm font-normal transition-all duration-300 ease-in-out hover:font-semibold">
+              <div className="border rounded-sm py-2 px-4 text-white hover:bg-[#FAA912] shadow-md bg-[#f09819] text-xs xs:text-sm transition-all duration-300 ease-in-out font-medium">
                 <button
                   onClick={handlePrint}
                   className=" outline-none border-none"
@@ -332,7 +339,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                   Print
                 </button>
               </div>
-              <div className="border rounded-sm p-2 shadow-md bg-gray-200 text-xs xs:text-sm font-semibold hover:bg-[#FAA912] transition-all duration-300 ease-in-out">
+              <div className="border rounded-sm p-2 shadow-md bg-green-700 text-white text-xs xs:text-sm font-semibold hover:bg-green-500 transition-all duration-300 ease-in-out">
                 Total = {totalPoints} ₹
               </div>
             </div>

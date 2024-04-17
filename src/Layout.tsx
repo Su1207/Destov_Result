@@ -29,6 +29,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import GavelIcon from "@mui/icons-material/Gavel";
 import { useBidDetailsContext } from "./components/BidData/BidDetailsContext";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 const drawerWidth = 240;
 
@@ -163,7 +164,7 @@ const Layout = (props: Props) => {
         </Typography>
       </Link>
       <List>
-        {["Market", "Bid Data", "Setting"].map((text, index) => (
+        {["Market", "Bid Data", "Win Data", "Setting"].map((text, index) => (
           <ListItem
             key={text}
             disablePadding
@@ -173,7 +174,15 @@ const Layout = (props: Props) => {
               transition: "all 0.3s ease-in-out",
             }}
             component={Link} // Use Link component from react-router-dom
-            to={index === 0 ? "/" : index === 1 ? "/bidData" : "/setting"} // Define the route to navigate to
+            to={
+              index === 0
+                ? "/"
+                : index === 1
+                ? "/bidData"
+                : index === 2
+                ? "/winData"
+                : "/setting"
+            } // Define the route to navigate to
           >
             <ListItemButton onClick={() => setMobileOpen(false)}>
               <ListItemIcon sx={{ color: "white" }}>
@@ -181,6 +190,8 @@ const Layout = (props: Props) => {
                   <StorefrontIcon />
                 ) : index === 1 ? (
                   <GavelIcon />
+                ) : index === 2 ? (
+                  <EmojiEventsIcon />
                 ) : (
                   <SettingsIcon />
                 )}
@@ -292,56 +303,62 @@ const Layout = (props: Props) => {
                 </DrawerHeader>
                 {/* <Divider sx={{ bgcolor: "white" }} /> */}
                 <List>
-                  {["Market", "Bid Data", "Setting"].map((text, index) => (
-                    <ListItem
-                      key={text}
-                      disablePadding
-                      sx={{
-                        display: "block",
-                        "&:hover": { bgcolor: "#FAA912" },
-                        transition: "all 0.3s ease-in-out",
-                      }}
-                      component={Link} // Use Link component from react-router-dom
-                      to={
-                        index === 0
-                          ? "/"
-                          : index === 1
-                          ? "/bidData"
-                          : "/setting"
-                      } // Define the route to navigate to
-                    >
-                      <ListItemButton
+                  {["Market", "Bid Data", "Win Data", "Setting"].map(
+                    (text, index) => (
+                      <ListItem
+                        key={text}
+                        disablePadding
                         sx={{
-                          minHeight: 48,
-                          justifyContent: open ? "initial" : "center",
-                          px: 2.5,
-                          color: "white",
-                          fontSize: "0.5rem",
+                          display: "block",
+                          "&:hover": { bgcolor: "#FAA912" },
+                          transition: "all 0.3s ease-in-out",
                         }}
+                        component={Link} // Use Link component from react-router-dom
+                        to={
+                          index === 0
+                            ? "/"
+                            : index === 1
+                            ? "/bidData"
+                            : index === 2
+                            ? "/winData"
+                            : "/setting"
+                        } // Define the route to navigate to
                       >
-                        <ListItemIcon
+                        <ListItemButton
                           sx={{
-                            minWidth: 0,
-                            mr: open ? 3 : "auto",
-                            justifyContent: "center",
+                            minHeight: 48,
+                            justifyContent: open ? "initial" : "center",
+                            px: 2.5,
                             color: "white",
+                            fontSize: "0.5rem",
                           }}
                         >
-                          {index === 0 ? (
-                            <StorefrontIcon />
-                          ) : index === 1 ? (
-                            <GavelIcon />
-                          ) : (
-                            <SettingsIcon />
-                          )}
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={text}
-                          sx={{ opacity: open ? 1 : 0, fontSize: "0.5rem" }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
+                          <ListItemIcon
+                            sx={{
+                              minWidth: 0,
+                              mr: open ? 3 : "auto",
+                              justifyContent: "center",
+                              color: "white",
+                            }}
+                          >
+                            {index === 0 ? (
+                              <StorefrontIcon />
+                            ) : index === 1 ? (
+                              <GavelIcon />
+                            ) : index === 2 ? (
+                              <EmojiEventsIcon />
+                            ) : (
+                              <SettingsIcon />
+                            )}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={text}
+                            sx={{ opacity: open ? 1 : 0, fontSize: "0.5rem" }}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    )
+                  )}
                 </List>
               </Drawer1>
             </div>

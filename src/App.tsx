@@ -12,6 +12,7 @@ import Profile from "./pages/Profile/Profile";
 import BidDataPage from "./pages/BidDataPage/BidDataPage";
 import BidDataDetailsPage from "./pages/BidDataPage/BidDataDetailsPage";
 import { BidDetailsProvider } from "./components/BidData/BidDetailsContext";
+import ResultDataPage from "./pages/ResultDataPage/ResultDataPage";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: "/bidData/:id",
         element: <BidDataDetailsPage />,
+      },
+      {
+        path: "/winData",
+        element: <ResultDataPage />,
       },
     ],
   },

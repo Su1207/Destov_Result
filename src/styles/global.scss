@@ -47,3 +47,21 @@ input {
     border-radius: 50%;
   }
 }
+
+.css-1961ak2-MuiTypography-root {
+  font-weight: 600 !important;
+  font-size: 1.3rem !important;
+  animation: bg 2s ease-in-out infinite;
+}
+
+@keyframes bg {
+  0% {
+    color: plum;
+  }
+  50% {
+    color: peru;
+  }
+  100% {
+    color: orange;
+  }
+}

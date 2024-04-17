@@ -68,7 +68,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
           const bidDataArray: BidDataType[] = [];
 
           dbSnapshot.forEach((firebaseDb) => {
-            if (firebaseDb.exists()) {
+            if (firebaseDb.exists() && !firebaseDb.val().disable) {
               const firebaseConfig1 = firebaseDb.val();
 
               const app1 = initializeApp(
@@ -207,7 +207,10 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       gameData.forEach((game) => {
         if (game.openTotal !== 0) {
           dbSnapshot.forEach((snapshot) => {
-            if (snapshot.val().name === game.appName) {
+            if (
+              snapshot.val().name === game.appName &&
+              !snapshot.val().disable
+            ) {
               const firebaseConfig1 = snapshot.val();
 
               const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
@@ -238,7 +241,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                     });
 
                     bidDetailsArray.push({
-                      appName: `${game.appName}:${game.gameKey}`,
+                      appName: `${game.appName}:${game.gameKey}:${game.gameName}`,
                       marketName: marketName,
                       numbers: numbers,
                       marketTotalPoints: marketTotalPoints,
@@ -298,7 +301,10 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       gameData.forEach((game) => {
         if (game.closeTotal !== 0) {
           dbSnapshot.forEach((snapshot) => {
-            if (snapshot.val().name === game.appName) {
+            if (
+              snapshot.val().name === game.appName &&
+              !snapshot.val().disable
+            ) {
               const firebaseConfig1 = snapshot.val();
 
               const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
