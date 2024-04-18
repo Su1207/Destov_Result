@@ -107,7 +107,7 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
       if (userSnapshot.exists()) {
         const userName = userSnapshot.val().NAME;
         const previousPoints = userSnapshot.val().AMOUNT;
-        const winPoints = points * (rate / 10);
+        const winPoints = points * Math.abs(rate / 10);
         const newPoints = previousPoints + winPoints;
 
         await update(userRef, { AMOUNT: newPoints });
