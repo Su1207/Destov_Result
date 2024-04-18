@@ -36,7 +36,7 @@ const ConfigInput = () => {
 
   const [firebases, setFirebases] = useState<any>();
   const [loading, setLoading] = useState(false);
-
+  const [itemIndex, setItemIndex] = useState("");
   const cancelButtonRef = useRef(null);
 
   const [title, setTitle] = useState("");
@@ -205,28 +205,61 @@ const ConfigInput = () => {
     }
   };
 
-  const handleDisable = async (index: string, disable: boolean) => {
+  const handleDisable = async (
+    index: string,
+    disable: boolean,
+    name: string
+  ) => {
     const dbref = ref(database, `FIREBASE CONFIGURATIONS/${index}/disable`);
     await set(dbref, !disable);
 
+    const marketRef = ref(database, `RESULTS`);
+
+    const snapshot = await get(marketRef);
+
     if (!disable) {
+      const promises: Promise<void>[] = [];
+
+      snapshot.forEach((gameKey) => {
+        if (gameKey.exists()) {
+          const appArray = gameKey.val().APP || [];
+          const updatedAppArray = appArray.filter(
+            (dbName: string) => dbName !== name
+          );
+
+          if (updatedAppArray.length === 0) {
+            const gameAppRef = ref(database, `RESULTS/${gameKey.key}`);
+            const promise1 = remove(gameAppRef);
+            promises.push(promise1);
+          } else {
+            // Update the app array in the database
+            const gameAppRef = ref(database, `RESULTS/${gameKey.key}/APP`);
+            const promise = set(gameAppRef, updatedAppArray);
+            promises.push(promise);
+          }
+        }
+      });
+      await Promise.all(promises);
       toast.success("Database disabled successfully!!");
     } else {
+      await handleUpdate(index);
       toast.success("Database enabled successfully!!");
     }
   };
 
-  const handleDisableClick = () => {
+  const handleDisableClick = (index: string) => {
     setTitle("Disable Account");
     setMessage("Are you sure want to disable the database?");
     setConfirmText("Disable");
+    setItemIndex(index);
     setOpen(true);
   };
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (index: string) => {
     setTitle("Delete Account");
     setMessage("Are you sure want to delete the database?");
     setConfirmText("Delete");
+    setItemIndex(index);
     setOpen(true);
   };
 
@@ -500,21 +533,23 @@ const ConfigInput = () => {
                         </div>
                         {data.disable ? (
                           <button
-                            onClick={() => handleDisable(index, data.disable)}
+                            onClick={() =>
+                              handleDisable(index, data.disable, data.name)
+                            }
                             className="border text-xs px-2 py-1 rounded-sm bg-green-600 text-white hover:scale-110 transition-all duration-300 ease-in-out"
                           >
                             Enable
                           </button>
                         ) : (
                           <button
-                            onClick={handleDisableClick}
+                            onClick={() => handleDisableClick(index)}
                             className="border text-xs px-2 py-1 rounded-sm bg-red-500 text-white hover:scale-110 transition-all duration-300 ease-in-out"
                           >
                             Disable
                           </button>
                         )}
 
-                        <div onClick={handleDeleteClick}>
+                        <div onClick={() => handleDeleteClick(index)}>
                           <DeleteForeverIcon className="text-red-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
                         </div>
                       </div>
@@ -578,8 +613,15 @@ const ConfigInput = () => {
                                       className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
                                       onClick={() =>
                                         confirmText === "Disable"
-                                          ? handleDisable(index, data.disable)
-                                          : handleDelete(index, data.name)
+                                          ? handleDisable(
+                                              itemIndex,
+                                              firebases[itemIndex].disable,
+                                              firebases[itemIndex].name
+                                            )
+                                          : handleDelete(
+                                              itemIndex,
+                                              firebases[itemIndex].name
+                                            )
                                       }
                                     >
                                       {confirmText}
