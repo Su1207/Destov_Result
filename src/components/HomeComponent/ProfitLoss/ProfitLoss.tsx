@@ -11,7 +11,7 @@ const ProfitLoss = () => {
     const calculateProfit = () => {
       const value = totalBid - totalWin;
 
-      if (value > 0) {
+      if (value >= 0) {
         setProfit(true);
       } else if (value < 0) {
         setProfit(false);

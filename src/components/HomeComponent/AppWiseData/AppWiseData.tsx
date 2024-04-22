@@ -43,7 +43,7 @@ const AppWiseData = () => {
             <div className="grid grid-cols-4 gap-3">
               <div
                 className={`p-4 border min-h-24 shadow-md rounded-md ${
-                  bidTotal[db] - winTotal[db] > 0
+                  bidTotal[db] - winTotal[db] >= 0
                     ? "bg-green-600"
                     : "bg-red-600"
                 }`}
