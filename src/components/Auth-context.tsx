@@ -32,6 +32,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [lastActivity, setLastActivity] = useState(Date.now());
 
   // Check for stored authentication data on component mount
   useEffect(() => {
@@ -43,6 +44,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsAuthenticated(JSON.parse(storedAuth));
     }
   }, []);
+
+  // Monitor user activity to reset last activity time
+  useEffect(() => {
+    const activityListener = () => {
+      setLastActivity(Date.now());
+    };
+
+    document.addEventListener("mousemove", activityListener);
+    document.addEventListener("keydown", activityListener);
+
+    return () => {
+      document.removeEventListener("mousemove", activityListener);
+      document.removeEventListener("keydown", activityListener);
+    };
+  }, []);
+
+  // Logout user if inactive for more than 30 minutes
+  useEffect(() => {
+    const idleTimer = setInterval(() => {
+      const currentTime = Date.now();
+      const idleTime = currentTime - lastActivity;
+      const idleDuration = 2 * 60 * 60 * 1000; // 120 minutes
+
+      if (idleTime >= idleDuration) {
+        logout();
+      }
+    }, 1000); // Check every second
+
+    return () => clearInterval(idleTimer);
+  }, [lastActivity]);
 
   const login = async (username: string, password: string) => {
     const userRef = ref(database, `ADMIN/AUTH`);
