@@ -10,7 +10,7 @@ const HomePage = () => {
   const { profit } = useBidDetailsContext();
   return (
     <div>
-      <div className="grid grid-cols-4 grid-flow-dense min-h-24 gap-3">
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense min-h-24 gap-3">
         <div
           className={`p-4 border min-h-24 flex items-center justify-center col-span-1 row-span-1 rounded-md ${
             profit ? "bg-green-600" : "bg-red-600"

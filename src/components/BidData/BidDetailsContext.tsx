@@ -44,7 +44,7 @@ export const BidDetailsProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   const [bidDetails, setbidDetails] = useState<MarketDetailsType[]>([]);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [value, setValue] = useState<Dayjs | null>(dayjs(new Date()));
   const [totalBid, setTotalBid] = useState(0);
   const [totalWin, setTotalWin] = useState(0);
