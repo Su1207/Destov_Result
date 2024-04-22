@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useBidDetailsContext } from "../../BidData/BidDetailsContext";
-import { CircularProgress } from "@mui/material";
 
 const ProfitLoss = () => {
-  const { totalBid, totalWin, loading } = useBidDetailsContext();
+  const { totalBid, totalWin } = useBidDetailsContext();
 
   const { profit, setProfit } = useBidDetailsContext();
   const [calculatedValue, setCalculatedValue] = useState(0);
