@@ -40,7 +40,7 @@ interface BidDataProps {
 }
 
 const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
-  const { setbidDetails } = useBidDetailsContext();
+  const { setbidDetails, selectedMenuItem } = useBidDetailsContext();
 
   const [bidData, setBidData] = useState<BidDataType[] | null>(null);
   const { setCombineBidData } = useBidDetailsContext();
@@ -155,9 +155,16 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     };
 
     fetchBidData();
-  }, [date, month, year, newDate, newMonth]);
+  }, [date, month, year, newDate, newMonth, selectedMenuItem]);
 
   const navigate = useNavigate();
+
+  const getTotalPoints = (gameData: BidDataType[]): number => {
+    return gameData.reduce(
+      (total, bid) => total + bid.openTotal + bid.closeTotal,
+      0
+    );
+  };
 
   const combineBidData = async (bidDataArray: BidDataType[]) => {
     try {
@@ -181,6 +188,19 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                   gameName: gameName,
                   gameData: updatedBidData,
                 });
+
+                // Sort the combineBid based on selectedMenu
+                if (selectedMenuItem === "High") {
+                  combineBid.sort(
+                    (a, b) =>
+                      getTotalPoints(b.gameData) - getTotalPoints(a.gameData)
+                  );
+                } else if (selectedMenuItem === "Low") {
+                  combineBid.sort(
+                    (a, b) =>
+                      getTotalPoints(a.gameData) - getTotalPoints(b.gameData)
+                  );
+                }
               }
             }
           });

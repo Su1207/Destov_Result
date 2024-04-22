@@ -3,19 +3,17 @@
 .MuiStack-root {
   display: flex;
   justify-content: end;
-  margin-bottom: 2rem;
+  // margin-bottom: 0.5rem;
 
   @include xl {
     display: flex !important;
     flex-direction: row !important;
     justify-content: end !important;
-    margin-bottom: 2rem;
   }
 
   @include sm {
     display: flex !important;
     justify-content: end !important;
-    margin-bottom: 1rem;
   }
 }
 

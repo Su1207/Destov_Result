@@ -30,6 +30,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import GavelIcon from "@mui/icons-material/Gavel";
 import { useBidDetailsContext } from "./components/BidData/BidDetailsContext";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import HomeIcon from "@mui/icons-material/Home";
 
 const drawerWidth = 240;
 
@@ -164,45 +165,51 @@ const Layout = (props: Props) => {
         </Typography>
       </Link>
       <List>
-        {["Market", "Bid Data", "Win Data", "Setting"].map((text, index) => (
-          <ListItem
-            key={text}
-            disablePadding
-            sx={{
-              display: "block",
-              "&:hover": { bgcolor: "#FAA912" },
-              transition: "all 0.3s ease-in-out",
-            }}
-            component={Link} // Use Link component from react-router-dom
-            to={
-              index === 0
-                ? "/"
-                : index === 1
-                ? "/bidData"
-                : index === 2
-                ? "/winData"
-                : "/setting"
-            } // Define the route to navigate to
-          >
-            <ListItemButton onClick={() => setMobileOpen(false)}>
-              <ListItemIcon sx={{ color: "white" }}>
-                {index === 0 ? (
-                  <StorefrontIcon />
-                ) : index === 1 ? (
-                  <GavelIcon />
-                ) : index === 2 ? (
-                  <EmojiEventsIcon />
-                ) : (
-                  <SettingsIcon />
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary={text}
-                sx={{ color: "white", fontSize: "0.5rem" }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {["Dashboard", "Market", "Bid Data", "Win Data", "Setting"].map(
+          (text, index) => (
+            <ListItem
+              key={text}
+              disablePadding
+              sx={{
+                display: "block",
+                "&:hover": { bgcolor: "#FAA912" },
+                transition: "all 0.3s ease-in-out",
+              }}
+              component={Link} // Use Link component from react-router-dom
+              to={
+                index === 0
+                  ? "/"
+                  : index === 1
+                  ? "/market"
+                  : index === 2
+                  ? "/bidData"
+                  : index === 3
+                  ? "winData"
+                  : "/setting"
+              } // Define the route to navigate to
+            >
+              <ListItemButton onClick={() => setMobileOpen(false)}>
+                <ListItemIcon sx={{ color: "white" }}>
+                  {index === 0 ? (
+                    <HomeIcon />
+                  ) : index === 1 ? (
+                    <StorefrontIcon />
+                  ) : index === 2 ? (
+                    <GavelIcon />
+                  ) : index === 3 ? (
+                    <EmojiEventsIcon />
+                  ) : (
+                    <SettingsIcon />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={text}
+                  sx={{ color: "white", fontSize: "0.5rem" }}
+                />
+              </ListItemButton>
+            </ListItem>
+          )
+        )}
       </List>
     </div>
   );
@@ -303,62 +310,70 @@ const Layout = (props: Props) => {
                 </DrawerHeader>
                 {/* <Divider sx={{ bgcolor: "white" }} /> */}
                 <List>
-                  {["Market", "Bid Data", "Win Data", "Setting"].map(
-                    (text, index) => (
-                      <ListItem
-                        key={text}
-                        disablePadding
+                  {[
+                    "Dashboard",
+                    "Market",
+                    "Bid Data",
+                    "Win Data",
+                    "Setting",
+                  ].map((text, index) => (
+                    <ListItem
+                      key={text}
+                      disablePadding
+                      sx={{
+                        display: "block",
+                        "&:hover": { bgcolor: "#FAA912" },
+                        transition: "all 0.3s ease-in-out",
+                      }}
+                      component={Link} // Use Link component from react-router-dom
+                      to={
+                        index === 0
+                          ? "/"
+                          : index === 1
+                          ? "/market"
+                          : index === 2
+                          ? "/bidData"
+                          : index === 3
+                          ? "winData"
+                          : "/setting"
+                      } // Define the route to navigate to
+                    >
+                      <ListItemButton
                         sx={{
-                          display: "block",
-                          "&:hover": { bgcolor: "#FAA912" },
-                          transition: "all 0.3s ease-in-out",
+                          minHeight: 48,
+                          justifyContent: open ? "initial" : "center",
+                          px: 2.5,
+                          color: "white",
+                          fontSize: "0.5rem",
                         }}
-                        component={Link} // Use Link component from react-router-dom
-                        to={
-                          index === 0
-                            ? "/"
-                            : index === 1
-                            ? "/bidData"
-                            : index === 2
-                            ? "/winData"
-                            : "/setting"
-                        } // Define the route to navigate to
                       >
-                        <ListItemButton
+                        <ListItemIcon
                           sx={{
-                            minHeight: 48,
-                            justifyContent: open ? "initial" : "center",
-                            px: 2.5,
+                            minWidth: 0,
+                            mr: open ? 3 : "auto",
+                            justifyContent: "center",
                             color: "white",
-                            fontSize: "0.5rem",
                           }}
                         >
-                          <ListItemIcon
-                            sx={{
-                              minWidth: 0,
-                              mr: open ? 3 : "auto",
-                              justifyContent: "center",
-                              color: "white",
-                            }}
-                          >
-                            {index === 0 ? (
-                              <StorefrontIcon />
-                            ) : index === 1 ? (
-                              <GavelIcon />
-                            ) : index === 2 ? (
-                              <EmojiEventsIcon />
-                            ) : (
-                              <SettingsIcon />
-                            )}
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={text}
-                            sx={{ opacity: open ? 1 : 0, fontSize: "0.5rem" }}
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                    )
-                  )}
+                          {index === 0 ? (
+                            <HomeIcon />
+                          ) : index === 1 ? (
+                            <StorefrontIcon />
+                          ) : index === 2 ? (
+                            <GavelIcon />
+                          ) : index === 3 ? (
+                            <EmojiEventsIcon />
+                          ) : (
+                            <SettingsIcon />
+                          )}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={text}
+                          sx={{ opacity: open ? 1 : 0, fontSize: "0.5rem" }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
                 </List>
               </Drawer1>
             </div>

@@ -14,6 +14,7 @@ import BidDataDetailsPage from "./pages/BidDataPage/BidDataDetailsPage";
 import { BidDetailsProvider } from "./components/BidData/BidDetailsContext";
 import ResultDataPage from "./pages/ResultDataPage/ResultDataPage";
 import WinDetailPage from "./pages/ResultDataPage/WinDetailPage";
+import HomePage from "./pages/HomePage/HomePage";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
+        element: <HomePage />,
+      },
+      {
+        path: "/market",
         element: <MarketDetails />,
       },
       {

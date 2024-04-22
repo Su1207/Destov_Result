@@ -7,6 +7,11 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import "./BidDataPage.scss";
 import { useBidDetailsContext } from "../../components/BidData/BidDetailsContext";
+import * as React from "react";
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 
 const BidDataPage = () => {
   const { value, setValue } = useBidDetailsContext();
@@ -30,29 +35,78 @@ const BidDataPage = () => {
   //     }
   //   };
 
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [open, setOpen] = React.useState(false);
+  const { setSelectedMenuItem } = useBidDetailsContext();
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (value: string) => {
+    setSelectedMenuItem(value);
+    setOpen(false);
+    setAnchorEl(null);
+  };
+
   return (
     <div className="bidDataPage">
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DemoContainer components={["MobileDatePicker"]}>
-          <DemoItem>
-            <div className="flex items-center gap-2">
-              <div className="text-sm font-semibold ">Select Date</div>
-              <MobileDatePicker
-                value={value}
-                onChange={(newValue) => setValue(newValue)}
-                maxDate={dayjs()}
-              />
-            </div>
-          </DemoItem>
-          {/* <DemoItem>
+      <div className="mb-8 flex items-center sm:justify-end justify-between">
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DemoContainer components={["MobileDatePicker"]}>
+            <DemoItem>
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-semibold ">Select Date</div>
+                <MobileDatePicker
+                  value={value}
+                  onChange={(newValue) => setValue(newValue)}
+                  maxDate={dayjs()}
+                />
+              </div>
+            </DemoItem>
+            {/* <DemoItem>
             <DateCalendar
               value={selectedDate}
               onChange={(newValue: Dayjs) => handleDateChange(newValue)}
               maxDate={dayjs()} // Prevent selecting dates beyond today
             />
           </DemoItem> */}
-        </DemoContainer>
-      </LocalizationProvider>
+          </DemoContainer>
+        </LocalizationProvider>
+
+        <div className="flex justify-end">
+          <Button
+            id="basic-button"
+            aria-controls={open ? "basic-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            onClick={handleClick}
+          >
+            <FilterAltIcon sx={{ fontSize: "30px", color: "#343a40" }} />
+          </Button>
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            MenuListProps={{
+              "aria-labelledby": "basic-button",
+            }}
+          >
+            <MenuItem onClick={() => handleMenuItemClick("High")}>
+              High to Low
+            </MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick("Low")}>
+              Low to High
+            </MenuItem>
+          </Menu>
+        </div>
+      </div>
       <BidData date={date} month={month} year={year} />
     </div>
   );
