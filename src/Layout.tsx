@@ -483,7 +483,11 @@ const Layout = (props: Props) => {
               component="main"
               sx={{
                 flexGrow: 1,
-                p: 3,
+                p: 2, // Default padding value for sizes smaller than sm
+                "@media (min-width: 640px)": {
+                  // This is the default breakpoint for sm in Theme UI
+                  p: 3, // Override padding for sm size
+                },
                 display: "flex",
                 flexDirection: "column",
                 minHeight: "100vh",

@@ -1,10 +1,11 @@
-import { get, getDatabase, ref } from "firebase/database";
+import { get, getDatabase, ref, remove, set } from "firebase/database";
 import { useEffect, useState } from "react";
 import { database } from "../../firebase";
 import { initializeApp } from "firebase/app";
 import { CircularProgress } from "@mui/material";
 import { useBidDetailsContext } from "./BidDetailsContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 type BidDataType = {
   appName: string;
@@ -44,6 +45,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
 
   const [bidData, setBidData] = useState<BidDataType[] | null>(null);
   const { setCombineBidData } = useBidDetailsContext();
+  const [returned, setReturned] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [combineBid, setCombineBid] = useState<CombineBidType[]>();
@@ -155,7 +157,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     };
 
     fetchBidData();
-  }, [date, month, year, newDate, newMonth, selectedMenuItem]);
+  }, [date, month, year, newDate, newMonth, selectedMenuItem, returned]);
 
   const navigate = useNavigate();
 
@@ -447,6 +449,139 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     return arrangedMarketData;
   };
 
+  const handleReturn = async (gameData: BidDataType) => {
+    try {
+      setLoading(true);
+      const appName = gameData.appName;
+
+      const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
+      const dbSnapshot = await get(dbRef);
+
+      if (dbSnapshot.exists()) {
+        await processDBSnapshot(dbSnapshot, appName, gameData);
+      }
+
+      toast.success("Successfully returned Bid!!!");
+    } catch (err) {
+      console.log(err);
+      toast.error("Error occured..");
+    } finally {
+      setLoading(false);
+      setReturned(!returned);
+    }
+  };
+
+  const processDBSnapshot = async (
+    dbSnapshot: any,
+    appName: string,
+    gameData: BidDataType
+  ) => {
+    const promises: Promise<void>[] = [];
+
+    dbSnapshot.forEach((db: any) => {
+      if (db.exists() && db.val().name === appName && !db.val().disable) {
+        const firebaseConfig1 = db.val();
+        const app1 = initializeApp(firebaseConfig1, `${appName}`);
+        const database1 = getDatabase(app1);
+
+        const bidRef = ref(
+          database1,
+          `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${gameData.gameKey}`
+        );
+
+        promises.push(
+          new Promise<void>((resolve, reject) => {
+            get(bidRef)
+              .then(async (bidSnapshot) => {
+                if (bidSnapshot.exists()) {
+                  await processBidSnapshot(
+                    bidSnapshot,
+                    database1,
+                    gameData,
+                    resolve
+                  );
+                } else {
+                  resolve();
+                }
+              })
+              .catch(reject);
+          })
+        );
+      }
+    });
+
+    await Promise.all(promises);
+  };
+
+  const processBidSnapshot = async (
+    bidSnapshot: any,
+    database1: any,
+    gameData: BidDataType,
+    resolve: () => void
+  ) => {
+    // const promises: Promise<void>[] = [];
+    const queue: (() => Promise<void>)[] = [];
+
+    const bidRef = ref(
+      database1,
+      `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${gameData.gameKey}`
+    );
+
+    bidSnapshot.forEach((gameType: any) => {
+      gameType.forEach((game: any) => {
+        game.forEach((number: any) => {
+          number.child("USERS").forEach((user: any) => {
+            const phone = user.key;
+
+            const userRef = ref(database1, `USERS/${phone}/AMOUNT`);
+            const transactionRef = ref(
+              database1,
+              `USERS TRANSACTION/${phone}/BID/DATE WISE/${year}/${newMonth}/${newDate}/${gameData.gameKey}`
+            );
+            queue.push(async () => {
+              const snapshot = await get(userRef);
+              if (snapshot.exists()) {
+                const newAmount = snapshot.val() + user.val();
+                console.log(snapshot.val());
+
+                // Perform the set operation
+                await set(userRef, newAmount);
+                console.log("Set operation completed");
+
+                const transactionSnapshot = await get(transactionRef);
+                if (transactionSnapshot.exists()) {
+                  const promises: Promise<void>[] = [];
+                  transactionSnapshot.forEach((timeSnap) => {
+                    const timestamp = timeSnap.key;
+
+                    const totalRef = ref(
+                      database1,
+                      `USERS TRANSACTION/${phone}/BID/TOTAL/${gameData.gameKey}/${timestamp}`
+                    );
+
+                    const promise1 = remove(totalRef);
+                    promises.push(promise1);
+                  });
+                  await Promise.all(promises);
+                  await remove(transactionRef);
+                }
+              }
+            });
+          });
+        });
+      });
+    });
+
+    // Execute the queue sequentially
+    for (const task of queue) {
+      await task();
+    }
+
+    console.log("All set operations completed");
+    await remove(bidRef);
+    resolve();
+  };
+
   return (
     <div>
       {loading ? (
@@ -490,6 +625,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                         <th scope="col" className="px-6 py-3">
                           TOTAL
                         </th>
+                        <th scope="col" className=""></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -508,6 +644,14 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                           <td className="px-6 py-4">{bidData.closeTotal}</td>
                           <td className="px-6 py-4">
                             {bidData.openTotal + bidData.closeTotal}
+                          </td>
+                          <td className="px-3">
+                            <button
+                              onClick={() => handleReturn(bidData)}
+                              className="text-xs px-3 py-1 bg-blue-900 hover:bg-orange-500 transition-all duration-300 ease-in-out shadow-md rounded-sm text-white border"
+                            >
+                              Return
+                            </button>
                           </td>
                         </tr>
                       ))}
