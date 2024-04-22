@@ -52,7 +52,7 @@ const AppWiseData = () => {
                   <div className="h-full w-16 rounded-sm border bg-white flex items-center justify-center">
                     <img
                       src={
-                        bidTotal[db] - winTotal[db] > 0
+                        bidTotal[db] - winTotal[db] >= 0
                           ? "profit.png"
                           : "lost.png"
                       }
