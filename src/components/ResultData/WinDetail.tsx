@@ -5,6 +5,7 @@ import { initializeApp } from "firebase/app";
 import { CircularProgress } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Link } from "react-router-dom";
+import { useBidDetailsContext } from "../BidData/BidDetailsContext";
 
 export interface WinDetailsType {
   date: string;
@@ -25,13 +26,19 @@ const WinDetail: React.FC<{ gameData: string }> = ({ gameData }) => {
   const [appName, gameName, gameKey] = gameData.split(":");
 
   const [loading, setLoading] = useState(false);
+  const { winDate } = useBidDetailsContext();
 
-  const selectedWinDate = new Date();
-  const currentYear = selectedWinDate.getFullYear();
-  const currentMonth = (selectedWinDate.getMonth() + 1)
-    .toString()
-    .padStart(2, "0");
-  const currentDay = selectedWinDate.getDate().toString().padStart(2, "0");
+  const [date, month, year] = [
+    winDate?.date(),
+    winDate?.month(),
+    winDate?.year(),
+  ];
+
+  const newDate = date?.toString().padStart(2, "0");
+  const newMonth =
+    month !== undefined && month >= 0
+      ? (month + 1)?.toString().padStart(2, "0")
+      : "";
 
   useEffect(() => {
     const fetchWinDetails = async () => {
@@ -53,7 +60,7 @@ const WinDetail: React.FC<{ gameData: string }> = ({ gameData }) => {
 
               const winDetailRef = ref(
                 database1,
-                `TOTAL TRANSACTION/WIN/DATE WISE/${currentYear}/${currentMonth}/${currentDay}/${gameKey}`
+                `TOTAL TRANSACTION/WIN/DATE WISE/${year}/${newMonth}/${newDate}/${gameKey}`
               );
 
               const winDetails: WinDetailsType[] = [];
@@ -99,7 +106,7 @@ const WinDetail: React.FC<{ gameData: string }> = ({ gameData }) => {
       }
     };
     fetchWinDetails();
-  }, [gameKey, appName]);
+  }, [gameKey, appName, date, month, year]);
 
   console.log(winDetails);
 
@@ -117,79 +124,85 @@ const WinDetail: React.FC<{ gameData: string }> = ({ gameData }) => {
             </Link>{" "}
             <div className=" text-2xl font-bold">{gameName}</div>
           </div>
-          <table className="w-full text-sm text-center border rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead className="text-sm text-gray-100 uppercase bg-orange-500 dark:bg-gray-700 dark:text-gray-400">
-              <tr>
-                <th scope="col" className="px-3 sm:px-4 py-3 text-center">
-                  USERNAME
-                </th>
-                <th scope="col" className="px-3 sm:px-4 py-3 text-center">
-                  GAME NAME
-                </th>
-                <th scope="col" className="px-3 sm:px-4 py-3 text-center">
-                  NUMBER
-                </th>
-                <th scope="col" className="px-3 sm:px-4 py-3 text-center">
-                  BID AMOUNT
-                </th>
-                <th scope="col" className="px-3 sm:px-4 py-3 text-center">
-                  PREVIOUS POINTS
-                </th>
-                <th scope="col" className="px-3 sm:px-4 py-3 text-center">
-                  WIN POINTS
-                </th>
-                <th scope="col" className="px-3 sm:px-4 py-3 text-center">
-                  NEW POINTS
-                </th>
-                <th scope="col" className="px-3 sm:px-4 py-3 text-center">
-                  DATE
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {winDetails.length > 0 &&
-                winDetails.map((data, index) => (
-                  <tr
-                    key={index}
-                    className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b text-center dark:border-gray-700"
-                  >
-                    <th
-                      scope="row"
-                      className="px-3 cursor-pointer sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+          {winDetails.length > 0 ? (
+            <table className="w-full text-sm text-center border rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="text-sm text-gray-100 uppercase bg-orange-500 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-center">
+                    USERNAME
+                  </th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-center">
+                    GAME NAME
+                  </th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-center">
+                    NUMBER
+                  </th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-center">
+                    BID AMOUNT
+                  </th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-center">
+                    PREVIOUS POINTS
+                  </th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-center">
+                    WIN POINTS
+                  </th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-center">
+                    NEW POINTS
+                  </th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-center">
+                    DATE
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {winDetails.length > 0 &&
+                  winDetails.map((data, index) => (
+                    <tr
+                      key={index}
+                      className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b text-center dark:border-gray-700"
                     >
-                      <div className="flex flex-col items-start">
-                        <div className="capitalize">{data.userName}</div>
-                        <div>{data.phoneNumber}</div>
-                      </div>
-                    </th>
-                    <td className="px-3 sm:px-6 cursor-pointer py-4">
-                      {data.gameName} ({data.openClose})
-                    </td>
-                    <td className="px-3 sm:px-6 cursor-pointer py-4">
-                      {data.number}
-                    </td>
-                    <td className="px-3 sm:px-6 cursor-pointer py-4">
-                      {data.bidAmount}
-                    </td>
-                    <td className="px-3 sm:px-6 cursor-pointer py-4">
-                      {data.previousPoints}
-                    </td>
-                    <td className="px-3 sm:px-6 cursor-pointer py-4">
-                      {data.winPoints}
-                    </td>
-                    <td className="px-3 sm:px-6 cursor-pointer py-4">
-                      {data.newPoints}
-                    </td>
-                    <td className="px-3 sm:px-6 cursor-pointer py-4 ">
-                      <div className="flex flex-col min-w-[85px]">
-                        <div>{data.date.split(" | ")[0]}</div>
-                        <div>{data.date.split(" | ")[1]}</div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+                      <th
+                        scope="row"
+                        className="px-3 cursor-pointer sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                      >
+                        <div className="flex flex-col items-start">
+                          <div className="capitalize">{data.userName}</div>
+                          <div>{data.phoneNumber}</div>
+                        </div>
+                      </th>
+                      <td className="px-3 sm:px-6 cursor-pointer py-4">
+                        {data.gameName} ({data.openClose})
+                      </td>
+                      <td className="px-3 sm:px-6 cursor-pointer py-4">
+                        {data.number}
+                      </td>
+                      <td className="px-3 sm:px-6 cursor-pointer py-4">
+                        {data.bidAmount}
+                      </td>
+                      <td className="px-3 sm:px-6 cursor-pointer py-4">
+                        {data.previousPoints}
+                      </td>
+                      <td className="px-3 sm:px-6 cursor-pointer py-4">
+                        {data.winPoints}
+                      </td>
+                      <td className="px-3 sm:px-6 cursor-pointer py-4">
+                        {data.newPoints}
+                      </td>
+                      <td className="px-3 sm:px-6 cursor-pointer py-4 ">
+                        <div className="flex flex-col min-w-[85px]">
+                          <div>{data.date.split(" | ")[0]}</div>
+                          <div>{data.date.split(" | ")[1]}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="no-data">
+              <img src="/noData.gif" alt="" className="no-data-img" />
+            </div>
+          )}
         </div>
       )}
     </div>

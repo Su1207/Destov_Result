@@ -41,7 +41,7 @@ interface BidDataProps {
 }
 
 const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
-  const { setbidDetails, selectedMenuItem } = useBidDetailsContext();
+  const { setbidDetails } = useBidDetailsContext();
 
   const [bidData, setBidData] = useState<BidDataType[] | null>(null);
   const { setCombineBidData } = useBidDetailsContext();
@@ -157,16 +157,9 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     };
 
     fetchBidData();
-  }, [date, month, year, newDate, newMonth, selectedMenuItem, returned]);
+  }, [date, month, year, newDate, newMonth, returned]);
 
   const navigate = useNavigate();
-
-  const getTotalPoints = (gameData: BidDataType[]): number => {
-    return gameData.reduce(
-      (total, bid) => total + bid.openTotal + bid.closeTotal,
-      0
-    );
-  };
 
   const combineBidData = async (bidDataArray: BidDataType[]) => {
     try {
@@ -190,19 +183,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                   gameName: gameName,
                   gameData: updatedBidData,
                 });
-
-                // Sort the combineBid based on selectedMenu
-                if (selectedMenuItem === "High") {
-                  combineBid.sort(
-                    (a, b) =>
-                      getTotalPoints(b.gameData) - getTotalPoints(a.gameData)
-                  );
-                } else if (selectedMenuItem === "Low") {
-                  combineBid.sort(
-                    (a, b) =>
-                      getTotalPoints(a.gameData) - getTotalPoints(b.gameData)
-                  );
-                }
               }
             }
           });
@@ -238,7 +218,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
               const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
 
               const database1 = getDatabase(app1);
-              console.log(game.gameKey);
               const dataRef = ref(
                 database1,
                 `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/OPEN`
@@ -262,10 +241,17 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                       }
                     });
 
+                    const sortedNumbers = Object.fromEntries(
+                      Object.entries(numbers).sort(([, a], [, b]) => {
+                        // Change the logic here to sort based on points
+                        return a - b;
+                      })
+                    );
+
                     bidDetailsArray.push({
                       appName: `${game.appName}:${game.gameKey}:${game.gameName}`,
                       marketName: marketName,
-                      numbers: numbers,
+                      numbers: sortedNumbers,
                       marketTotalPoints: marketTotalPoints,
                     });
                   });

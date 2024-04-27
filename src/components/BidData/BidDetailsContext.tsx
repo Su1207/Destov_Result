@@ -12,6 +12,8 @@ interface BidDetailsContextProps {
   setOpen: (data: boolean) => void;
   value: Dayjs | null;
   setValue: (data: Dayjs | null) => void;
+  winDate: Dayjs | null;
+  setWinDate: (data: Dayjs | null) => void;
   totalBid: number;
   setTotalBid: (Data: number) => void;
   totalWin: number;
@@ -54,6 +56,7 @@ export const BidDetailsProvider: React.FC<{ children: ReactNode }> = ({
   const [loading, setLoading] = useState(false);
   const [profit, setProfit] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState("");
+  const [winDate, setWinDate] = useState<Dayjs | null>(dayjs(new Date()));
 
   const [bidTotal, setBidTotal] = useState<BidTotalType>({});
 
@@ -86,6 +89,8 @@ export const BidDetailsProvider: React.FC<{ children: ReactNode }> = ({
         setProfit,
         selectedMenuItem,
         setSelectedMenuItem,
+        winDate,
+        setWinDate,
       }}
     >
       {children}

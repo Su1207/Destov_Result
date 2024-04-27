@@ -7,6 +7,11 @@ import RelatedUserDetails from "./RelatedUserDetails";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Link } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import { CombineBidDataType } from "./BidData";
 
 export type UserDetailsType = {
   [appName: string]: SingleUserDetail[];
@@ -60,26 +65,64 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
       ? (month + 1)?.toString().padStart(2, "0")
       : "";
 
-  console.log(combinebidData);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [Open, setOpen] = useState(false);
+  const [selectedMenuItem, setSelectedMenuItem] = useState("");
+  const [sortedCombineData, setSortedCombineData] = useState<
+    CombineBidDataType[]
+  >([]);
 
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (value: string) => {
+    setSelectedMenuItem(value);
+    setOpen(false);
+    setAnchorEl(null);
+  };
+
+  console.log(selectedMenuItem);
   useEffect(() => {
     let totalPoints = 0;
     combinebidData.map((data) => {
       totalPoints += data.marketTotalPoints;
     });
     setTotalPoints(totalPoints);
-  }, [combinebidData]);
+
+    // Sort the numbers object within each market based on points
+    const sortedData = combinebidData.map((market) => {
+      const sortedNumbers = Object.fromEntries(
+        Object.entries(market.numbers).sort(([, a], [, b]) => {
+          // Change the logic here to sort based on points
+          return selectedMenuItem === "High" ? b - a : a - b;
+        })
+      );
+      console.log(sortedNumbers);
+
+      return { ...market, numbers: sortedNumbers };
+    });
+    console.log(sortedData);
+
+    // Update combinebidData state with sorted data
+    setSortedCombineData(sortedData);
+  }, [selectedMenuItem]);
 
   // Organize data into rows
   const rows: any = Array.from(
     {
       length: Math.max(
-        ...combinebidData.map((market) => Object.keys(market.numbers).length)
+        ...sortedCombineData.map((market) => Object.keys(market.numbers).length)
       ),
     },
     (_, index) => ({
       id: index + 1,
-      ...combinebidData.reduce(
+      ...sortedCombineData.reduce(
         (acc, market) => ({
           ...acc,
           [market.marketName]: Object.entries(market.numbers)[index]
@@ -282,7 +325,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
         />
       )}
       <div className={`${open ? "lg:w-[76%] xl:min-w-[82%]" : "lg:w-[100%]"} `}>
-        {combinebidData && combinebidData.length > 0 ? (
+        {sortedCombineData && sortedCombineData.length > 0 ? (
           <>
             <div className="flex items-center text-2xl font-bold mb-4">
               <Link to={"/bidData"} className="hover:text-[#F05387]">
@@ -296,7 +339,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
               </div>
             </div>
             <div className="border p-4 rounded-md shadow-lg bg-gradient-to-r from-[#8e2de2] to-[#4a00e0] text-white w-auto mb-4 sm:w-96">
-              {combinebidData.map((data, index) => (
+              {sortedCombineData.map((data, index) => (
                 <div
                   key={index}
                   className="flex mb-1 justify-between items-center"
@@ -341,6 +384,33 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
               </div>
               <div className="border rounded-sm p-2 shadow-md bg-green-700 text-white text-xs xs:text-sm font-semibold hover:bg-green-500 transition-all duration-300 ease-in-out">
                 Total = {totalPoints} ₹
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  id="basic-button"
+                  aria-controls={Open ? "basic-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={Open ? "true" : undefined}
+                  onClick={handleClick}
+                >
+                  <FilterAltIcon sx={{ fontSize: "30px", color: "#343a40" }} />
+                </Button>
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={Open}
+                  onClose={handleClose}
+                  MenuListProps={{
+                    "aria-labelledby": "basic-button",
+                  }}
+                >
+                  <MenuItem onClick={() => handleMenuItemClick("High")}>
+                    High to Low
+                  </MenuItem>
+                  <MenuItem onClick={() => handleMenuItemClick("Low")}>
+                    Low to High
+                  </MenuItem>
+                </Menu>
               </div>
             </div>
             <div

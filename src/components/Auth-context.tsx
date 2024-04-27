@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const idleTimer = setInterval(() => {
       const currentTime = Date.now();
       const idleTime = currentTime - lastActivity;
-      const idleDuration = 2 * 60 * 60 * 1000; // 120 minutes
+      const idleDuration = 60 * 60 * 1000; // 120 minutes
 
       if (idleTime >= idleDuration) {
         logout();
