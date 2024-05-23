@@ -9,7 +9,7 @@ const BgColor = () => {
   const [backgroundColor, setBackgroundColor] = useState<string>("#070683");
   const [menuColor, setMenuColor] = useState<string>("#070683");
 
-  const isSmallScreen = useMediaQuery("(max-width:600px)");
+  const isSmallScreen = useMediaQuery("(max-width:550px)");
 
   const handleColorChange = (color: ColorResult) => {
     setBackgroundColor(color.hex);
