@@ -437,7 +437,7 @@ const Layout = (props: Props) => {
                     sx={{
                       width: { lg: `calc(100% - ${drawerWidth}px)` },
                       ml: { lg: `${drawerWidth}px` },
-                      background: "#343a40",
+                      background: menuColor,
                     }}
                   >
                     <Toolbar>
