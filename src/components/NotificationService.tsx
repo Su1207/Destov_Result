@@ -1,10 +1,11 @@
 export async function sendNotificationToTopic(
   title: string,
+  topic: string,
   body: string,
   key: string
 ) {
   const message = {
-    to: `/topics/Users`,
+    to: `/topics/${topic}`,
     notification: {
       title: title,
       body: body,

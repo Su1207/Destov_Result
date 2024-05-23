@@ -2,7 +2,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import "./App.css";
 import ConfigInput from "./pages/ConfigInput/ConfigInput";
 import MarketDetails from "./pages/Market/MarketDetails";
-import { ToastContainer } from "react-toastify";
+import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Layout from "./Layout";
 import { AuthProvider } from "./components/Auth-context";
@@ -65,7 +65,19 @@ function App() {
   return (
     <>
       <AuthProvider>
-        <ToastContainer />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+          transition={Slide}
+        />
         <BidDetailsProvider>
           <RouterProvider router={router} />
         </BidDetailsProvider>

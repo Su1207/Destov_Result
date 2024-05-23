@@ -92,7 +92,8 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
     rate: number,
     result: string,
     openClose: string,
-    gameId: string
+    gameId: string,
+    authorization: string
   ) => {
     if (!sendRewardsQueue[phoneNumber]) {
       sendRewardsQueue[phoneNumber] = Promise.resolve();
@@ -153,6 +154,22 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
           set(userTransactionDateWiseRef, transactionData),
           set(totalTransactionDateWiseRef, transactionData),
         ]);
+
+        await sendNotificationToTopic(
+          phoneNumber,
+          "Congratulation! You win the game",
+          "Market Name: " +
+            gameName +
+            " (" +
+            openClose +
+            ")\n" +
+            "Bidding Amount: " +
+            points +
+            "\n" +
+            "Winning Amount: " +
+            winPoints,
+          authorization
+        );
       }
     });
 
@@ -311,7 +328,8 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                                             ? singleDigit
                                             : openFormResult,
                                           open,
-                                          gameId
+                                          gameId,
+                                          firebaseConfig.val().authorizationKey
                                         );
 
                                         promises.push(promise6);
@@ -396,6 +414,7 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                               promises.push(promise);
                               sendNotificationToTopic(
                                 gameName,
+                                "Users",
                                 `${openFormResult}-${midResult}-✦✦✦`,
                                 firebaseConfig.val().authorizationKey
                               );
@@ -610,7 +629,9 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                                                   element === panel
                                                   ? close
                                                   : open,
-                                                gameId
+                                                gameId,
+                                                firebaseConfig.val()
+                                                  .authorizationKey
                                               );
 
                                               promises.push(promise6);
@@ -704,6 +725,7 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                               promises.push(promise);
                               sendNotificationToTopic(
                                 gameName,
+                                "Users",
                                 `${open}-${midResult}-${closeFormResult}`,
                                 firebaseConfig.val().authorizationKey
                               );

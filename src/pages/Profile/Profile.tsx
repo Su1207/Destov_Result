@@ -58,6 +58,7 @@ const Profile = () => {
       }
     };
     fetchAdmin();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   return (
@@ -67,7 +68,7 @@ const Profile = () => {
           <CircularProgress color="secondary" />
         </div>
       ) : (
-        <div className="w-[100%] border p-4 xs:p-6 sm:p-8 shadow-lg rounded-sm">
+        <div className="w-[100%] bg-white border p-4 xs:p-6 sm:p-8 shadow-lg rounded-sm">
           <div className="font-bold text-[1rem] xs:text-[1.5rem] text-[#6c757d] mb-4">
             Admin Credentials
           </div>

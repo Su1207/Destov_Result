@@ -31,6 +31,17 @@ const AppWiseData = () => {
     }
   }, []);
 
+  const convertToPercentge = (bid: number, win: number) => {
+    const value = bid - win;
+
+    if (value !== 0) {
+      const percentage = ((Math.abs(value) / bid) * 100).toFixed(2);
+      return parseFloat(percentage);
+    } else {
+      return 0;
+    }
+  };
+
   return (
     <div>
       {dbNames.length > 0 &&
@@ -65,7 +76,12 @@ const AppWiseData = () => {
                       Profit/Loss
                     </div>
                     <div className="font-semibold text-white">
-                      &#8377; {Math.abs(bidTotal[db] - winTotal[db])}
+                      &#8377; {Math.abs(bidTotal[db] - winTotal[db])}{" "}
+                      <span className="val_percent text-sm font-light">
+                        {bidTotal[db] - winTotal[db] >= 0 ? "+" : "-"}(
+                        {convertToPercentge(bidTotal[db], winTotal[db])}
+                        %)
+                      </span>
                     </div>
                   </div>
                 </div>

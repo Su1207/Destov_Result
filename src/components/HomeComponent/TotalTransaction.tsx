@@ -1,5 +1,5 @@
 import { get, getDatabase, ref } from "firebase/database";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { database } from "../../firebase";
 import { initializeApp } from "firebase/app";
 import { useBidDetailsContext } from "../BidData/BidDetailsContext";
@@ -14,8 +14,6 @@ const TotalTransaction = () => {
   const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, "0");
   const currentDay = currentDate.getDate().toString().padStart(2, "0");
 
-  const [loading, setLoading] = useState(false);
-
   const {
     bidTotal,
     setBidTotal,
@@ -25,6 +23,8 @@ const TotalTransaction = () => {
     setdepositTotal,
     withdrawTotal,
     setWithdrawTotal,
+    loading,
+    setLoading,
   } = useBidDetailsContext();
   const { totalBid, setTotalBid } = useBidDetailsContext();
 

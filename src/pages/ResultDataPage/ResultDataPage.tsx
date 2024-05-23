@@ -7,6 +7,7 @@ import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import ResultData from "../../components/ResultData/ResultData";
 import dayjs from "dayjs";
 import { useBidDetailsContext } from "../../components/BidData/BidDetailsContext";
+import { useEffect } from "react";
 
 const ResultDataPage = () => {
   const { winDate, setWinDate } = useBidDetailsContext();
@@ -16,6 +17,10 @@ const ResultDataPage = () => {
     winDate?.month(),
     winDate?.year(),
   ];
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
   return (
     <div className="bidDataPage">
       <LocalizationProvider dateAdapter={AdapterDayjs}>

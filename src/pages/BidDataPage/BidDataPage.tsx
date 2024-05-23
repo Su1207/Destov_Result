@@ -7,6 +7,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import "./BidDataPage.scss";
 import { useBidDetailsContext } from "../../components/BidData/BidDetailsContext";
+import { useEffect } from "react";
 
 const BidDataPage = () => {
   const { value, setValue } = useBidDetailsContext();
@@ -29,6 +30,10 @@ const BidDataPage = () => {
   //       console.log("Selected Year:", selectedYear);
   //     }
   //   };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   return (
     <div className="bidDataPage">

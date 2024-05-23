@@ -18,6 +18,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import BgColor from "../../components/BgColor/BgColor";
 
 const ConfigInput = () => {
   const [config, setConfig] = useState({
@@ -188,6 +189,7 @@ const ConfigInput = () => {
     } catch (err) {
       console.log(err);
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const { logout } = useAuth();
@@ -306,7 +308,7 @@ const ConfigInput = () => {
         </div>
       ) : (
         <div className="w-[89vw] xs:w-[100%]">
-          <div className=" border p-4 sm:p-8 shadow-lg rounded-sm mb-8">
+          <div className="bg-white border p-4 sm:p-8 shadow-lg rounded-sm mb-8">
             <div className=" font-bold text-[1.5rem] text-[#6c757d] mb-4">
               Firebase Configuration
             </div>
@@ -454,8 +456,12 @@ const ConfigInput = () => {
             </form>
           </div>
 
+          <div className="flex bg-white justify-center items-center border p-4 sm:p-8 shadow-lg rounded-sm mb-8">
+            <BgColor />
+          </div>
+
           {firebases ? (
-            <div className=" border p-4 sm:p-8 shadow-lg rounded-sm">
+            <div className="bg-white border p-4 sm:p-8 shadow-lg rounded-sm">
               <div className=" font-bold text-[1.5rem] text-[#6c757d] mb-4">
                 Firebase Databases
               </div>

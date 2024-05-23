@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("isAuthenticated", JSON.stringify(true));
       } else {
-        toast.error("Username or Password not found");
+        toast.error("Invalid Username or Password");
       }
     } catch (error) {
       console.error("Error fetching user data:", error);

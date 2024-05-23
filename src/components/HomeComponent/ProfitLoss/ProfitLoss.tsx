@@ -6,10 +6,18 @@ const ProfitLoss = () => {
 
   const { profit, setProfit } = useBidDetailsContext();
   const [calculatedValue, setCalculatedValue] = useState(0);
+  const [calculatedPercent, setCalculatedPercent] = useState(0);
 
   useEffect(() => {
     const calculateProfit = () => {
       const value = totalBid - totalWin;
+
+      if (value !== 0) {
+        const percentage = ((Math.abs(value) / totalBid) * 100).toFixed(2);
+        setCalculatedPercent(parseFloat(percentage));
+      } else {
+        setCalculatedPercent(0);
+      }
 
       if (value >= 0) {
         setProfit(true);
@@ -23,6 +31,7 @@ const ProfitLoss = () => {
     // Call the function when the component mounts or when totalDeposit or totalWithdraw changes
     calculateProfit();
   }, [totalBid, totalWin]);
+
   return (
     <div className="h-full w-full flex gap-4">
       <div className="h-full w-16 rounded-sm border bg-white flex items-center justify-center">
@@ -35,7 +44,10 @@ const ProfitLoss = () => {
       <div className="flex flex-col">
         <div className="font-bold text-white text-xl">Profit/Loss</div>
         <div className="font-semibold text-white">
-          &#8377; {calculatedValue}
+          &#8377; {calculatedValue}{" "}
+          <span className="val_percent text-sm font-light">
+            {profit ? "+" : "-"}({calculatedPercent}%)
+          </span>
         </div>
       </div>
     </div>
