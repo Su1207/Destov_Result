@@ -10,6 +10,9 @@ import React, {
 import { get, ref } from "firebase/database";
 import { database } from "../firebase";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../store/store";
+import { clearUser, setUserData } from "../store/userSlice";
 
 interface User {
   ID: string;
@@ -18,8 +21,7 @@ interface User {
 
 interface AuthContextProps {
   user: User | null;
-  isAuthenticated: boolean;
-  login: (username: string, password: string) => void;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -31,19 +33,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
-
-  // Check for stored authentication data on component mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedAuth = localStorage.getItem("isAuthenticated");
-
-    if (storedUser && storedAuth) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(JSON.parse(storedAuth));
-    }
-  }, []);
 
   // Monitor user activity to reset last activity time
   useEffect(() => {
@@ -75,7 +65,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => clearInterval(idleTimer);
   }, [lastActivity]);
 
-  const login = async (username: string, password: string) => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const login = async (
+    username: string,
+    password: string
+  ): Promise<boolean> => {
     const userRef = ref(database, `ADMIN/AUTH`);
 
     try {
@@ -87,33 +82,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (userData.PASSWORD === password && userData.ID === username) {
         // Update state
         setUser(userData);
-        setIsAuthenticated(true);
 
-        // Store authentication data in localStorage
-        localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("isAuthenticated", JSON.stringify(true));
+        dispatch(setUserData({ username, isAuthenticated: true }));
+
+        return true;
       } else {
         toast.error("Invalid Username or Password");
+        return false;
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
+      return false;
     }
   };
 
   const logout = () => {
-    // Clear stored authentication data
-    localStorage.removeItem("user");
-    localStorage.removeItem("isAuthenticated");
-
+    dispatch(clearUser());
     // Update state
     setUser(null);
-    setIsAuthenticated(false);
 
     // navigate("/login"); // Redirect to login after logout
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, isAuthenticated, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

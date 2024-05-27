@@ -44,7 +44,7 @@ const BgColor = () => {
   const pickerStyles = {
     default: {
       picker: {
-        width: isSmallScreen ? "300px" : "500px",
+        width: isSmallScreen ? "300px" : "400px",
         height: isSmallScreen ? "320px" : "440px",
       },
     },

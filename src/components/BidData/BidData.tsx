@@ -1,5 +1,5 @@
 import { get, getDatabase, ref, remove, set } from "firebase/database";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { database } from "../../firebase";
 import { initializeApp } from "firebase/app";
 import { CircularProgress } from "@mui/material";
@@ -57,7 +57,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       : "";
 
   // console.log(newDate, newMonth, year);
-  console.log(bidData);
 
   useEffect(() => {
     const fetchBidData = async () => {
@@ -141,15 +140,14 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
 
           // Wait for all promises to resolve before setting the bid data
           await Promise.all(promises);
-
           setTimeout(() => {
             setBidData(bidDataArray);
             combineBidData(bidDataArray);
 
             setLoading(false);
-          }, 700); // A
-          // Set the bid data after all promises have resolved
-          setBidData(bidDataArray);
+          }, 700);
+
+          console.log(bidData);
         }
       } catch (err) {
         console.log(err);
@@ -161,7 +159,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
 
   const navigate = useNavigate();
 
-  const combineBidData = async (bidDataArray: BidDataType[]) => {
+  const combineBidData = useCallback(async (bidDataArray: BidDataType[]) => {
     try {
       setLoading(true);
       const resultRef = ref(database, "RESULTS");
@@ -170,126 +168,42 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       if (resultSnapshot.exists()) {
         const combineBid: CombineBidType[] = [];
 
-        if (bidDataArray) {
-          resultSnapshot.forEach((gameId) => {
-            if (gameId.exists()) {
-              const gameName = gameId.val().NAME;
-              const updatedBidData = bidDataArray.filter(
-                (bid) => bid.gameName === gameName
-              );
-              //   console.log(updatedBidData);
-              if (updatedBidData.length > 0) {
-                combineBid.push({
-                  gameName: gameName,
-                  gameData: updatedBidData,
-                });
-              }
+        resultSnapshot.forEach((gameId) => {
+          if (gameId.exists()) {
+            const gameName = gameId.val().NAME;
+            const updatedBidData = bidDataArray.filter(
+              (bid) => bid.gameName === gameName
+            );
+            if (updatedBidData.length > 0) {
+              combineBid.push({
+                gameName,
+                gameData: updatedBidData,
+              });
             }
-          });
-          setCombineBid(combineBid);
-        }
+          }
+        });
+
+        setCombineBid(combineBid);
       }
     } catch (err) {
       console.log(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleOpenClick = async (gameData: BidDataType[], gameName: string) => {
     try {
       setLoading(true);
-      const dbREf = ref(database, "FIREBASE CONFIGURATIONS");
-
-      const dbSnapshot = await get(dbREf);
-
-      const bidDetailsArray: MarketDetailsType[] = [];
-      const promises: Promise<void>[] = [];
-
-      gameData.forEach((game) => {
-        if (game.openTotal !== 0) {
-          dbSnapshot.forEach((snapshot) => {
-            if (
-              snapshot.val().name === game.appName &&
-              !snapshot.val().disable
-            ) {
-              const firebaseConfig1 = snapshot.val();
-
-              const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
-
-              const database1 = getDatabase(app1);
-              const dataRef = ref(
-                database1,
-                `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/OPEN`
-              );
-
-              const promise2 = get(dataRef).then((marketType) => {
-                if (marketType.exists()) {
-                  marketType.forEach((gameName) => {
-                    const marketName = gameName.key || "";
-                    const numbers: { [number: string]: number } = {};
-                    let marketTotalPoints = 0;
-
-                    gameName.forEach((numberSnapshot) => {
-                      if (numberSnapshot.exists()) {
-                        const number = numberSnapshot.key;
-                        const points = numberSnapshot.val().POINTS || 0;
-
-                        marketTotalPoints += points;
-
-                        numbers[number] = points;
-                      }
-                    });
-
-                    const sortedNumbers = Object.fromEntries(
-                      Object.entries(numbers).sort(([, a], [, b]) => {
-                        // Change the logic here to sort based on points
-                        return a - b;
-                      })
-                    );
-
-                    bidDetailsArray.push({
-                      appName: `${game.appName}:${game.gameKey}:${game.gameName}`,
-                      marketName: marketName,
-                      numbers: sortedNumbers,
-                      marketTotalPoints: marketTotalPoints,
-                    });
-                  });
-                }
-              });
-              promises.push(promise2);
-            }
-          });
-        }
-      });
-
-      const sortOrder = [
-        "Single Digit",
-        "Jodi Digit",
-        "Single Panel",
-        "Double Panel",
-        "Triple Panel",
-        "Half Sangam",
-        "Full Sangam",
-      ];
-
-      bidDetailsArray.sort(
-        (a, b) =>
-          sortOrder.indexOf(a.marketName) - sortOrder.indexOf(b.marketName)
-      );
-
-      // Wait for all promises to resolve
-      await Promise.all(promises);
-
-      // Once all promises are resolved and bidDetails is populated, set the state
+      const bidDetailsArray = await fetchMarketDetails(gameData, "OPEN");
       setbidDetails(bidDetailsArray);
-      const combineBidData = await combineBidDetails(bidDetailsArray);
-      setCombineBidData(combineBidData);
+      const combinedData = await combineBidDetails(bidDetailsArray);
+      setCombineBidData(combinedData);
+      navigate(`/bidData/OPEN:${gameName}`);
     } catch (err) {
       console.log(err);
     } finally {
       setLoading(false);
-      navigate(`/bidData/OPEN:${gameName}`);
     }
   };
 
@@ -299,124 +213,81 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
   ) => {
     try {
       setLoading(true);
-      const dbREf = ref(database, "FIREBASE CONFIGURATIONS");
-
-      const dbSnapshot = await get(dbREf);
-
-      const bidDetailsArray: MarketDetailsType[] = [];
-      const promises: Promise<void>[] = [];
-
-      gameData.forEach((game) => {
-        if (game.closeTotal !== 0) {
-          dbSnapshot.forEach((snapshot) => {
-            if (
-              snapshot.val().name === game.appName &&
-              !snapshot.val().disable
-            ) {
-              const firebaseConfig1 = snapshot.val();
-
-              const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
-
-              const database1 = getDatabase(app1);
-              console.log(game.gameKey);
-              const dataRef = ref(
-                database1,
-                `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/CLOSE`
-              );
-
-              const promise2 = get(dataRef).then((marketType) => {
-                if (marketType.exists()) {
-                  marketType.forEach((gameName) => {
-                    const marketName = gameName.key || "";
-                    const numbers: { [number: string]: number } = {};
-                    let marketTotalPoints = 0;
-
-                    gameName.forEach((numberSnapshot) => {
-                      if (numberSnapshot.exists()) {
-                        const number = numberSnapshot.key;
-                        const points = numberSnapshot.val().POINTS || 0;
-
-                        marketTotalPoints += points;
-
-                        numbers[number] = points;
-                      }
-                    });
-
-                    bidDetailsArray.push({
-                      appName: `${game.appName}:${game.gameKey}`,
-                      marketName: marketName,
-                      numbers: numbers,
-                      marketTotalPoints: marketTotalPoints,
-                    });
-                  });
-                }
-              });
-              promises.push(promise2);
-            }
-          });
-        }
-      });
-
-      const sortOrder = [
-        "Single Digit",
-        "Jodi Digit",
-        "Single Panel",
-        "Double Panel",
-        "Triple Panel",
-        "Half Sangam",
-        "Full Sangam",
-      ];
-
-      bidDetailsArray.sort(
-        (a, b) =>
-          sortOrder.indexOf(a.marketName) - sortOrder.indexOf(b.marketName)
-      );
-
-      // Wait for all promises to resolve
-      await Promise.all(promises);
-
-      // Once all promises are resolved and bidDetails is populated, set the state
+      const bidDetailsArray = await fetchMarketDetails(gameData, "CLOSE");
       setbidDetails(bidDetailsArray);
-      const combineBidData = await combineBidDetails(bidDetailsArray);
-      setCombineBidData(combineBidData);
+      const combinedData = await combineBidDetails(bidDetailsArray);
+      setCombineBidData(combinedData);
+      navigate(`/bidData/CLOSE:${gameName}`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       console.log(err);
     } finally {
       setLoading(false);
-      navigate(`/bidData/CLOSE:${gameName}`);
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  const combineBidDetails = async (bidDetailsArray: MarketDetailsType[]) => {
-    const marketMap = new Map<string, CombineBidDataType>();
+  const fetchMarketDetails = async (
+    gameData: BidDataType[],
+    type: string
+  ): Promise<MarketDetailsType[]> => {
+    const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
+    const dbSnapshot = await get(dbRef);
+    const bidDetailsArray: MarketDetailsType[] = [];
+    const promises: Promise<void>[] = [];
 
-    bidDetailsArray.forEach(
-      ({ appName, marketName, numbers, marketTotalPoints }) => {
-        if (marketMap.has(marketName)) {
-          const existingMarket = marketMap.get(marketName)!;
-          Object.keys(numbers).forEach((number) => {
-            existingMarket.numbers[number] =
-              (existingMarket.numbers[number] || 0) + numbers[number];
-          });
-          // Add appName to the existing market's appName array
-          existingMarket.appName.push(appName); // <- Change here
-          // Update marketTotalPoints
-          existingMarket.marketTotalPoints += marketTotalPoints;
-        } else {
-          // Add a new market to the map
-          marketMap.set(marketName, {
-            appName: [appName], // Array of appNames
-            marketName: marketName,
-            numbers: { ...numbers }, // Clone numbers object
-            marketTotalPoints: marketTotalPoints,
-          });
-        }
+    gameData.forEach((game) => {
+      if (
+        (type === "OPEN" && game.openTotal !== 0) ||
+        (type === "CLOSE" && game.closeTotal !== 0)
+      ) {
+        dbSnapshot.forEach((snapshot) => {
+          if (snapshot.val().name === game.appName && !snapshot.val().disable) {
+            const firebaseConfig1 = snapshot.val();
+            const app1 = initializeApp(firebaseConfig1, `${game.appName}`);
+            const database1 = getDatabase(app1);
+            const dataRef = ref(
+              database1,
+              `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${game.gameKey}/${type}`
+            );
+
+            const promise = get(dataRef).then((marketType) => {
+              if (marketType.exists()) {
+                marketType.forEach((gameName) => {
+                  const marketName = gameName.key || "";
+                  const numbers: { [number: string]: number } = {};
+                  let marketTotalPoints = 0;
+
+                  gameName.forEach((numberSnapshot) => {
+                    if (numberSnapshot.exists()) {
+                      const number = numberSnapshot.key;
+                      const points = numberSnapshot.val().POINTS || 0;
+
+                      marketTotalPoints += points;
+                      numbers[number] = points;
+                    }
+                  });
+
+                  const sortedNumbers = Object.fromEntries(
+                    Object.entries(numbers).sort(([, a], [, b]) => a - b)
+                  );
+
+                  bidDetailsArray.push({
+                    appName: `${game.appName}:${game.gameKey}:${game.gameName}`,
+                    marketName,
+                    numbers: sortedNumbers,
+                    marketTotalPoints,
+                  });
+                });
+              }
+            });
+
+            promises.push(promise);
+          }
+        });
       }
-    );
+    });
 
-    // Convert the map values back to an array
-    const arrangedMarketData = Array.from(marketMap.values());
+    await Promise.all(promises);
 
     const sortOrder = [
       "Single Digit",
@@ -427,12 +298,49 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       "Half Sangam",
       "Full Sangam",
     ];
-
-    arrangedMarketData.sort(
+    bidDetailsArray.sort(
       (a, b) =>
         sortOrder.indexOf(a.marketName) - sortOrder.indexOf(b.marketName)
     );
-    return arrangedMarketData;
+
+    return bidDetailsArray;
+  };
+
+  const combineBidDetails = async (
+    bidDetailsArray: MarketDetailsType[]
+  ): Promise<CombineBidDataType[]> => {
+    // const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
+    // const dbSnapshot = await get(dbRef);
+    // const resultSnapshot = await get(ref(database, "RESULTS"));
+
+    const combinedData: CombineBidDataType[] = [];
+    const combinedBidsMap: { [marketName: string]: CombineBidDataType } = {};
+
+    bidDetailsArray.forEach((bid) => {
+      const { marketName, numbers, marketTotalPoints, appName } = bid;
+
+      if (combinedBidsMap[marketName]) {
+        combinedBidsMap[marketName].appName.push(appName);
+        combinedBidsMap[marketName].marketTotalPoints += marketTotalPoints;
+
+        Object.keys(numbers).forEach((number) => {
+          combinedBidsMap[marketName].numbers[number] =
+            (combinedBidsMap[marketName].numbers[number] || 0) +
+            numbers[number];
+        });
+      } else {
+        combinedBidsMap[marketName] = {
+          appName: [appName],
+          marketName,
+          numbers: { ...numbers },
+          marketTotalPoints,
+        };
+      }
+    });
+
+    combinedData.push(...Object.values(combinedBidsMap));
+
+    return combinedData;
   };
 
   const handleReturn = async (gameData: BidDataType) => {

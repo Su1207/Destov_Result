@@ -34,10 +34,6 @@ const router = createBrowserRouter([
         element: <ConfigInput />,
       },
       {
-        path: "/login",
-        element: <Login />,
-      },
-      {
         path: "/profile",
         element: <Profile />,
       },
@@ -58,6 +54,10 @@ const router = createBrowserRouter([
         element: <WinDetailPage />,
       },
     ],
+  },
+  {
+    path: "/login",
+    element: <Login />,
   },
 ]);
 

@@ -3,6 +3,7 @@ import { useAuth } from "../../components/Auth-context";
 import "./login.scss";
 import PersonIcon from "@mui/icons-material/Person";
 import KeyIcon from "@mui/icons-material/Key";
+import { useNavigate } from "react-router-dom";
 // import { get, ref } from "firebase/database";
 // import { database } from "../../firebase";
 
@@ -12,8 +13,18 @@ const Login = () => {
   const { login } = useAuth();
   // const { subLogin } = useSubAuth();
 
-  const handleLogin = () => {
-    login(username, password);
+  const navigate = useNavigate();
+
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const isAuthenticated = await login(username, password);
+
+    if (isAuthenticated) {
+      navigate("/"); // Navigate to homepage if login is successful
+    } else {
+      console.log("Login failed. Please check your credentials.");
+    }
   };
 
   return (
@@ -21,7 +32,7 @@ const Login = () => {
       <div className="auth_container">
         <div className="login_container">
           <div className="login_title">Login</div>
-          <form>
+          <form onSubmit={handleLogin}>
             <label className="login-label">Username</label>
             <div className="input_space">
               <PersonIcon className="user_icon" />
@@ -29,6 +40,7 @@ const Login = () => {
                 type="text"
                 id="username"
                 placeholder="Username"
+                required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -42,13 +54,12 @@ const Login = () => {
                 type="password"
                 id="password"
                 placeholder="Password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <button type="button" onClick={handleLogin}>
-              Login
-            </button>
+            <button type="submit">Login</button>
           </form>
 
           <div className=" mt-[4rem] flex items-center justify-center text-[10px] text-[#98a6ad]">
