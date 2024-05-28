@@ -414,66 +414,84 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     resolve: () => void
   ) => {
     // const promises: Promise<void>[] = [];
-    const queue: (() => Promise<void>)[] = [];
-
     const bidRef = ref(
       database1,
       `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${gameData.gameKey}`
     );
 
-    bidSnapshot.forEach((gameType: any) => {
-      gameType.forEach((game: any) => {
-        game.forEach((number: any) => {
-          number.child("USERS").forEach((user: any) => {
-            const phone = user.key;
+    const promises: Promise<void>[] = [];
+    const userBidMap: Record<string, number> = {};
 
-            const userRef = ref(database1, `USERS/${phone}/AMOUNT`);
-            const transactionRef = ref(
-              database1,
-              `USERS TRANSACTION/${phone}/BID/DATE WISE/${year}/${newMonth}/${newDate}/${gameData.gameKey}`
-            );
-            queue.push(async () => {
-              const snapshot = await get(userRef);
-              if (snapshot.exists()) {
-                const newAmount = snapshot.val() + user.val();
-                console.log(snapshot.val());
+    if (bidSnapshot.exists()) {
+      // Process each gameType
+      bidSnapshot.forEach((gameTypeSnapshot: any) => {
+        // Process each game
+        gameTypeSnapshot.forEach((gameSnapshot: any) => {
+          // Process each number
+          gameSnapshot.forEach((numberSnapshot: any) => {
+            // Process each user
+            numberSnapshot.child("USERS").forEach((userSnapshot: any) => {
+              const phone = userSnapshot.key!;
+              const bidAmount = userSnapshot.val();
 
-                // Perform the set operation
-                await set(userRef, newAmount);
-                console.log("Set operation completed");
-
-                const transactionSnapshot = await get(transactionRef);
-                if (transactionSnapshot.exists()) {
-                  const promises: Promise<void>[] = [];
-                  transactionSnapshot.forEach((timeSnap) => {
-                    const timestamp = timeSnap.key;
-
-                    const totalRef = ref(
-                      database1,
-                      `USERS TRANSACTION/${phone}/BID/TOTAL/${gameData.gameKey}/${timestamp}`
-                    );
-
-                    const promise1 = remove(totalRef);
-                    promises.push(promise1);
-                  });
-                  await Promise.all(promises);
-                  await remove(transactionRef);
-                }
+              // Accumulate the total bid amount for each user
+              if (!userBidMap[phone]) {
+                userBidMap[phone] = 0;
               }
+              userBidMap[phone] += bidAmount;
             });
           });
         });
       });
-    });
 
-    // Execute the queue sequentially
-    for (const task of queue) {
-      await task();
+      console.log("User bid map:", userBidMap);
+
+      // Update each user's total amount
+      // Sequentially update each user's total amount
+      const users = Object.keys(userBidMap);
+      for (const phone of users) {
+        const userRef = ref(database1, `USERS/${phone}/AMOUNT`);
+        // Collect transaction removal tasks
+        const transactionRef = ref(
+          database1,
+          `USERS TRANSACTION/${phone}/BID/DATE WISE/${year}/${newMonth}/${newDate}/${gameData.gameKey}`
+        );
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          const newAmount = snapshot.val() + userBidMap[phone];
+          console.log(
+            `Updating user ${phone}: ${snapshot.val()} + ${
+              userBidMap[phone]
+            } = ${newAmount}`
+          );
+          await set(userRef, newAmount);
+        }
+
+        const transactionSnapshot = await get(transactionRef);
+        if (transactionSnapshot.exists()) {
+          transactionSnapshot.forEach((timeSnap) => {
+            if (timeSnap.exists()) {
+              const timestamp = timeSnap.key;
+              const totalRef = ref(
+                database1,
+                `USERS TRANSACTION/${phone}/BID/TOTAL/${gameData.gameKey}/${timestamp}`
+              );
+
+              promises.push(remove(totalRef));
+            }
+          });
+
+          promises.push(remove(transactionRef));
+        }
+      }
+
+      // Execute all user update tasks and transaction removal tasks in parallel
+      await Promise.all(promises);
+
+      console.log("All set operations completed");
+      await remove(bidRef);
+      resolve();
     }
-
-    console.log("All set operations completed");
-    await remove(bidRef);
-    resolve();
   };
 
   return (
