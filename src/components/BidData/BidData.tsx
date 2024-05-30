@@ -1,4 +1,4 @@
-import { get, getDatabase, ref, remove, set } from "firebase/database";
+import { get, getDatabase, ref, set } from "firebase/database";
 import { useCallback, useEffect, useState } from "react";
 import { database } from "../../firebase";
 import { initializeApp } from "firebase/app";
@@ -57,6 +57,39 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       : "";
 
   // console.log(newDate, newMonth, year);
+
+  const getMonthName = (index: number): string => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    return months[index];
+  };
+
+  const dateObj = new Date();
+  const year1 = dateObj.getFullYear();
+
+  const monthName = getMonthName(dateObj.getMonth());
+  const day = dateObj.getDate().toString().padStart(2, "0");
+  const month1 = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+  const hours = (dateObj.getHours() % 12 || 12).toString().padStart(2, "0");
+  const min = dateObj.getMinutes().toString().padStart(2, "0");
+  const sec = dateObj.getSeconds().toString().padStart(2, "0");
+
+  const meridiem = dateObj.getHours() >= 12 ? "PM" : "AM";
+
+  const dateString = `${day}-${monthName}-${year1} | ${hours}:${min}:${sec} ${meridiem}`;
 
   useEffect(() => {
     const fetchBidData = async () => {
@@ -413,12 +446,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     gameData: BidDataType,
     resolve: () => void
   ) => {
-    // const promises: Promise<void>[] = [];
-    const bidRef = ref(
-      database1,
-      `TOTAL TRANSACTION/BIDS/${year}/${newMonth}/${newDate}/${gameData.gameKey}`
-    );
-
     const promises: Promise<void>[] = [];
     const userBidMap: Record<string, number> = {};
 
@@ -426,19 +453,69 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       // Process each gameType
       bidSnapshot.forEach((gameTypeSnapshot: any) => {
         // Process each game
+        const type = gameTypeSnapshot.key;
         gameTypeSnapshot.forEach((gameSnapshot: any) => {
           // Process each number
+          const game = gameSnapshot.key;
           gameSnapshot.forEach((numberSnapshot: any) => {
             // Process each user
+            const number = numberSnapshot.key;
             numberSnapshot.child("USERS").forEach((userSnapshot: any) => {
-              const phone = userSnapshot.key!;
+              const phone = userSnapshot.key;
               const bidAmount = userSnapshot.val();
 
-              // Accumulate the total bid amount for each user
               if (!userBidMap[phone]) {
                 userBidMap[phone] = 0;
               }
               userBidMap[phone] += bidAmount;
+
+              // Capture the current bid amount for this user
+              const currentBidAmount = userBidMap[phone];
+
+              const promise1 = (async () => {
+                const userRef = ref(database1, `USERS/${phone}/AMOUNT`);
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                  const timestamp = Date.now();
+
+                  const userTransactionRef = ref(
+                    database1,
+                    `USERS TRANSACTION/${phone}/BID RETURN/DATE WISE/${year}/${month1}/${day}/${gameData.gameKey}/${timestamp}`
+                  );
+
+                  const userTransactionTotalRef = ref(
+                    database1,
+                    `USERS TRANSACTION/${phone}/BID RETURN/TOTAL/${gameData.gameKey}/${timestamp}`
+                  );
+
+                  const totalTransactionRef = ref(
+                    database1,
+                    `TOTAL TRANSACTION/BID RETURN/${year}/${month1}/${day}/${gameData.gameKey}/${timestamp}`
+                  );
+
+                  console.log(
+                    `${snapshot.val()} + ${currentBidAmount} (${bidAmount}): `,
+                    snapshot.val() + currentBidAmount
+                  );
+
+                  const payload = {
+                    DATE: dateString,
+                    GAME: game,
+                    MARKET_NAME: gameData.gameName,
+                    NUMBER: number,
+                    OPEN_CLOSE: type,
+                    POINTS_RETURN: bidAmount,
+                    NEW_POINTS: snapshot.val() + currentBidAmount,
+                    UID: phone,
+                  };
+
+                  await set(userTransactionRef, payload);
+                  await set(userTransactionTotalRef, payload);
+                  await set(totalTransactionRef, payload);
+                }
+              })();
+
+              promises.push(promise1);
             });
           });
         });
@@ -452,10 +529,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       for (const phone of users) {
         const userRef = ref(database1, `USERS/${phone}/AMOUNT`);
         // Collect transaction removal tasks
-        const transactionRef = ref(
-          database1,
-          `USERS TRANSACTION/${phone}/BID/DATE WISE/${year}/${newMonth}/${newDate}/${gameData.gameKey}`
-        );
+
         const snapshot = await get(userRef);
         if (snapshot.exists()) {
           const newAmount = snapshot.val() + userBidMap[phone];
@@ -466,30 +540,12 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
           );
           await set(userRef, newAmount);
         }
-
-        const transactionSnapshot = await get(transactionRef);
-        if (transactionSnapshot.exists()) {
-          transactionSnapshot.forEach((timeSnap) => {
-            if (timeSnap.exists()) {
-              const timestamp = timeSnap.key;
-              const totalRef = ref(
-                database1,
-                `USERS TRANSACTION/${phone}/BID/TOTAL/${gameData.gameKey}/${timestamp}`
-              );
-
-              promises.push(remove(totalRef));
-            }
-          });
-
-          promises.push(remove(transactionRef));
-        }
       }
 
       // Execute all user update tasks and transaction removal tasks in parallel
       await Promise.all(promises);
 
       console.log("All set operations completed");
-      await remove(bidRef);
       resolve();
     }
   };
