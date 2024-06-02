@@ -91,25 +91,31 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
         const { marketName, numbers, marketTotalPoints, appName } = bid;
 
         if (combinedBidsMap[marketName]) {
-          combinedBidsMap[marketName].appName.push(appName);
-          combinedBidsMap[marketName].marketTotalPoints += marketTotalPoints;
+          // Check if the marketName already exists in combinedBidsMap
+          const existingMarket = combinedBidsMap[marketName];
+          existingMarket.appName.push(appName);
+          existingMarket.marketTotalPoints += marketTotalPoints;
 
           numbers.forEach(({ number, points }) => {
-            const existingNumber = combinedBidsMap[marketName].numbers.find(
+            // Check if the number already exists in existingMarket
+            const existingNumberIndex = existingMarket.numbers.findIndex(
               (entry) => entry.number === number
             );
 
-            if (existingNumber) {
-              existingNumber.points += points;
+            if (existingNumberIndex !== -1) {
+              // If number exists, add points to existing points
+              existingMarket.numbers[existingNumberIndex].points += points;
             } else {
-              combinedBidsMap[marketName].numbers.push({ number, points });
+              // If number doesn't exist, add it to existingMarket
+              existingMarket.numbers.push({ number, points });
             }
           });
         } else {
+          // If marketName doesn't exist, add it to combinedBidsMap
           combinedBidsMap[marketName] = {
             appName: [appName],
             marketName,
-            numbers: [...numbers],
+            numbers: numbers.map(({ number, points }) => ({ number, points })),
             marketTotalPoints,
           };
         }
@@ -117,36 +123,29 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
 
       combinedData.push(...Object.values(combinedBidsMap));
     }
-
     return combinedData;
   };
 
   useEffect(() => {
     const combinedData = combineBidDetails();
-    setCombineBidData(combinedData);
-  }, [bidDetails]);
 
-  useEffect(() => {
     // Sorting based on selected menu item
-    if (combinebidData) {
-      combinebidData.forEach((data) => {
-        data.numbers = data.numbers.sort((a, b) => {
-          const aValue: number = a.points;
-          const bValue: number = b.points;
-          return selectedMenuItem === "High"
-            ? bValue - aValue
-            : aValue - bValue;
-        });
-      });
+    const sortedCombineData = [...combinedData];
+    sortedCombineData.forEach((data) => {
+      data.numbers = data.numbers.sort((a, b) =>
+        selectedMenuItem === "High" ? b.points - a.points : a.points - b.points
+      );
+    });
 
-      // Calculate total points
-      let totalPoints = 0;
-      combinebidData.forEach((data) => {
-        totalPoints += data.marketTotalPoints;
-      });
-      setTotalPoints(totalPoints);
-    }
-  }, [selectedMenuItem, bidDetails, combinebidData]);
+    setCombineBidData(sortedCombineData);
+
+    // Calculate total points
+    let totalPoints = 0;
+    combinedData.forEach((data) => {
+      totalPoints += data.marketTotalPoints;
+    });
+    setTotalPoints(totalPoints);
+  }, [selectedMenuItem, bidDetails]);
 
   const handleMenuItemClick = (value: string) => {
     setSelectedMenuItem(value);
