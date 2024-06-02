@@ -131,12 +131,15 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
 
     // Sorting based on selected menu item
     const sortedCombineData = [...combinedData];
-    sortedCombineData.forEach((data) => {
-      data.numbers = data.numbers.sort((a, b) =>
-        selectedMenuItem === "High" ? b.points - a.points : a.points - b.points
-      );
-    });
-
+    if (selectedMenuItem !== "") {
+      sortedCombineData.forEach((data) => {
+        data.numbers = data.numbers.sort((a, b) =>
+          selectedMenuItem === "High"
+            ? b.points - a.points
+            : a.points - b.points
+        );
+      });
+    }
     setCombineBidData(sortedCombineData);
 
     // Calculate total points
@@ -286,7 +289,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
 
       if (gameDetails) {
         newFormattedText += `\n✦ ${type} ✦\n\n`;
-        Object.entries(gameDetails.numbers).forEach(([number, points]) => {
+        gameDetails.numbers.forEach(({ number, points }) => {
           newFormattedText += `${number}=${points} ₹\n`;
         });
         newFormattedText += `--------------------\nTotal = ${gameDetails.marketTotalPoints}\n--------------------\n\n`;
@@ -441,6 +444,9 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                     "aria-labelledby": "basic-button",
                   }}
                 >
+                  <MenuItem onClick={() => handleMenuItemClick("")}>
+                    Default
+                  </MenuItem>
                   <MenuItem onClick={() => handleMenuItemClick("High")}>
                     High to Low
                   </MenuItem>

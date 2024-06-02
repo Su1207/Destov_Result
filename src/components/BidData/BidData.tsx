@@ -295,9 +295,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                     }
                   });
 
-                  // Sort the numbers array by points
-                  numbers.sort((a, b) => a.points - b.points);
-
                   bidDetailsArray.push({
                     appName: `${game.appName}:${game.gameKey}:${game.gameName}`,
                     marketName,
