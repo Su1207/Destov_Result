@@ -300,6 +300,32 @@ const ConfigInput = () => {
     logout();
   };
 
+  const downloadConfig = (database: any) => {
+    if (!database) return;
+
+    const configString = `
+      Name: ${database.name}
+      API Key: ${database.apiKey}
+      Auth Domain: ${database.authDomain}
+      Database URL: ${database.databaseURL}
+      Project ID: ${database.projectId}
+      Storage Bucket: ${database.storageBucket}
+      Messaging Sender ID: ${database.messagingSenderId}
+      App ID: ${database.appId}
+      Measurement ID: ${database.measurementId}
+    `;
+
+    const blob = new Blob([configString], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${database.name}.txt`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="w-full flex items-center justify-center">
       {loading ? (
@@ -533,30 +559,39 @@ const ConfigInput = () => {
                         </li> */}
                         </ul>{" "}
                       </div>
-                      <div className=" flex items-center gap-5 sm:gap-3 mt-4 sm:mt-2 justify-center sm:justify-end">
-                        <div onClick={() => handleUpdate(index)}>
-                          <RefreshIcon className="text-green-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
-                        </div>
-                        {data.disable ? (
-                          <button
-                            onClick={() =>
-                              handleDisable(index, data.disable, data.name)
-                            }
-                            className="border text-xs px-2 py-1 rounded-sm bg-green-600 text-white hover:scale-110 transition-all duration-300 ease-in-out"
-                          >
-                            Enable
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleDisableClick(index)}
-                            className="border text-xs px-2 py-1 rounded-sm bg-red-500 text-white hover:scale-110 transition-all duration-300 ease-in-out"
-                          >
-                            Disable
-                          </button>
-                        )}
+                      <div className="flex mt-6 justify-between items-center">
+                        <button
+                          onClick={() => downloadConfig(data)}
+                          type="button"
+                          className="border text-xs sm:text-sm px-3 py-1 rounded-sm shadow-md bg-blue-600 text-white transition-all duration-300 ease-in-out hover:animate-bounce"
+                        >
+                          Download
+                        </button>
+                        <div className=" flex items-center gap-5 sm:gap-3 justify-center sm:justify-end">
+                          <div onClick={() => handleUpdate(index)}>
+                            <RefreshIcon className="text-green-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                          </div>
+                          {data.disable ? (
+                            <button
+                              onClick={() =>
+                                handleDisable(index, data.disable, data.name)
+                              }
+                              className="border text-xs sm:text-sm px-2 py-1 rounded-sm bg-green-600 text-white hover:scale-110 transition-all duration-300 ease-in-out"
+                            >
+                              Enable
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleDisableClick(index)}
+                              className="border text-xs sm:text-sm px-2 py-1 rounded-sm bg-red-500 text-white hover:scale-110 transition-all duration-300 ease-in-out"
+                            >
+                              Disable
+                            </button>
+                          )}
 
-                        <div onClick={() => handleDeleteClick(index)}>
-                          <DeleteForeverIcon className="text-red-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                          <div onClick={() => handleDeleteClick(index)}>
+                            <DeleteForeverIcon className="text-red-500 hover:scale-110 cursor-pointer transition-all duration-300 ease-in-out " />
+                          </div>
                         </div>
                       </div>
                       <Transition.Root show={open} as={Fragment}>

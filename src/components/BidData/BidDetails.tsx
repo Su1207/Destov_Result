@@ -44,7 +44,8 @@ const currentFormattedDate = () => {
 const BidDetails: React.FC<{ gameType: string | undefined }> = ({
   gameType,
 }) => {
-  const { combinebidData, open, value } = useBidDetailsContext();
+  const { combinebidData, bidDetails, setCombineBidData, open, value } =
+    useBidDetailsContext();
   const [totalPoints, setTotalPoints] = useState(0);
   const [clickedNumber, setClickedNumber] = useState(false);
   const [clickPosition, setClickPosition] = useState<ClickPosition | null>(
@@ -68,9 +69,9 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [Open, setOpen] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState("");
-  const [sortedCombineData, setSortedCombineData] = useState<
-    CombineBidDataType[]
-  >([]);
+  // const [combinebidData, setcombinebidData] = useState<
+  //   CombineBidDataType[]
+  // >([]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -81,54 +82,86 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
     setAnchorEl(null);
   };
 
+  const combineBidDetails = () => {
+    const combinedData: CombineBidDataType[] = [];
+    const combinedBidsMap: { [marketName: string]: CombineBidDataType } = {};
+
+    if (bidDetails && bidDetails.length > 0) {
+      bidDetails.forEach((bid) => {
+        const { marketName, numbers, marketTotalPoints, appName } = bid;
+
+        if (combinedBidsMap[marketName]) {
+          combinedBidsMap[marketName].appName.push(appName);
+          combinedBidsMap[marketName].marketTotalPoints += marketTotalPoints;
+
+          numbers.forEach(({ number, points }) => {
+            const existingNumber = combinedBidsMap[marketName].numbers.find(
+              (entry) => entry.number === number
+            );
+
+            if (existingNumber) {
+              existingNumber.points += points;
+            } else {
+              combinedBidsMap[marketName].numbers.push({ number, points });
+            }
+          });
+        } else {
+          combinedBidsMap[marketName] = {
+            appName: [appName],
+            marketName,
+            numbers: [...numbers],
+            marketTotalPoints,
+          };
+        }
+      });
+
+      combinedData.push(...Object.values(combinedBidsMap));
+    }
+
+    return combinedData;
+  };
+
+  useEffect(() => {
+    const combinedData = combineBidDetails();
+
+    // Sorting based on selected menu item
+    combinedData.forEach((data) => {
+      data.numbers = data.numbers.sort((a, b) => {
+        const aValue: number = a.points;
+        const bValue: number = b.points;
+        return selectedMenuItem === "High" ? bValue - aValue : aValue - bValue;
+      });
+    });
+
+    setCombineBidData(combinedData);
+
+    // Calculate total points
+    let totalPoints = 0;
+    combinedData.forEach((data) => {
+      totalPoints += data.marketTotalPoints;
+    });
+    setTotalPoints(totalPoints);
+  }, [selectedMenuItem, bidDetails]);
+
   const handleMenuItemClick = (value: string) => {
     setSelectedMenuItem(value);
     setOpen(false);
     setAnchorEl(null);
   };
 
-  console.log(selectedMenuItem);
-  useEffect(() => {
-    let totalPoints = 0;
-    combinebidData.map((data) => {
-      totalPoints += data.marketTotalPoints;
-    });
-    setTotalPoints(totalPoints);
-
-    // Sort the numbers object within each market based on points
-    const sortedData = combinebidData.map((market) => {
-      const sortedNumbers = Object.fromEntries(
-        Object.entries(market.numbers).sort(([, a], [, b]) => {
-          // Change the logic here to sort based on points
-          return selectedMenuItem === "High" ? b - a : a - b;
-        })
-      );
-      console.log(sortedNumbers);
-
-      return { ...market, numbers: sortedNumbers };
-    });
-    console.log(sortedData);
-
-    // Update combinebidData state with sorted data
-    setSortedCombineData(sortedData);
-  }, [selectedMenuItem]);
-
-  // Organize data into rows
   const rows: any = Array.from(
     {
       length: Math.max(
-        ...sortedCombineData.map((market) => Object.keys(market.numbers).length)
+        ...combinebidData.map((market) => market.numbers.length)
       ),
     },
     (_, index) => ({
       id: index + 1,
-      ...sortedCombineData.reduce(
+      ...combinebidData.reduce(
         (acc, market) => ({
           ...acc,
-          [market.marketName]: Object.entries(market.numbers)[index]
-            ? `${Object.entries(market.numbers)[index][0]} = ${
-                Object.entries(market.numbers)[index][1]
-              } ₹`
+          [market.marketName]: market.numbers[index]
+            ? `${market.numbers[index].number} = ${market.numbers[index].points} ₹`
             : "", // Display "number = points ₹" only if both number and points exist
         }),
         {}
@@ -325,7 +358,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
         />
       )}
       <div className={`${open ? "lg:w-[76%] xl:min-w-[82%]" : "lg:w-[100%]"} `}>
-        {sortedCombineData && sortedCombineData.length > 0 ? (
+        {combinebidData && combinebidData.length > 0 ? (
           <>
             <div className="flex items-center text-2xl font-bold mb-4">
               <Link to={"/bidData"} className="hover:text-[#F05387]">
@@ -339,7 +372,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
               </div>
             </div>
             <div className="border p-4 rounded-md shadow-lg bg-gradient-to-r from-[#8e2de2] to-[#4a00e0] text-white w-auto mb-4 sm:w-96">
-              {sortedCombineData.map((data, index) => (
+              {combinebidData.map((data, index) => (
                 <div
                   key={index}
                   className="flex mb-1 justify-between items-center"
@@ -365,7 +398,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                 </button>
               </div>
             </div>
-            <div className=" flex justify-center xs:justify-end gap-2 mb-4">
+            <div className=" flex justify-center items-center xs:justify-end gap-2 mb-4">
               <div className="border rounded-sm text-white p-2 hover:bg-[#FAA912] shadow-md bg-[#f09819] text-xs xs:text-sm font-medium transition-all duration-300 ease-in-out">
                 <button
                   onClick={handleDownloadCSV}
@@ -430,7 +463,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                       <th
                         key={market.marketName}
                         scope="col"
-                        className="px-4 py-3 text-center min-w-32"
+                        className="px-4 py-3 text-center min-w-24"
                       >
                         {market.marketName}
                       </th>
@@ -448,7 +481,7 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
                       {combinebidData.map((market) => (
                         <td
                           key={`${rowIndex}-${market.marketName}`}
-                          className="px-4 py-4 text-center cursor-pointer min-w-[165px]"
+                          className="px-2 py-4 text-center cursor-pointer min-w-[150px]"
                           onClick={(event) =>
                             handleColumnClick(
                               event,

@@ -18,14 +18,14 @@ type BidDataType = {
 export type CombineBidDataType = {
   appName: string[];
   marketName: string;
-  numbers: { [number: string]: number };
+  numbers: { number: string; points: number }[];
   marketTotalPoints: number;
 };
 
 export interface MarketDetailsType {
   appName: string;
   marketName: string;
-  numbers: { [number: string]: number };
+  numbers: { number: string; points: number }[];
   marketTotalPoints: number;
 }
 
@@ -44,7 +44,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
   const { setbidDetails } = useBidDetailsContext();
 
   const [bidData, setBidData] = useState<BidDataType[] | null>(null);
-  const { setCombineBidData } = useBidDetailsContext();
   const [returned, setReturned] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -230,8 +229,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       setLoading(true);
       const bidDetailsArray = await fetchMarketDetails(gameData, "OPEN");
       setbidDetails(bidDetailsArray);
-      const combinedData = await combineBidDetails(bidDetailsArray);
-      setCombineBidData(combinedData);
       navigate(`/bidData/OPEN:${gameName}`);
     } catch (err) {
       console.log(err);
@@ -248,8 +245,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       setLoading(true);
       const bidDetailsArray = await fetchMarketDetails(gameData, "CLOSE");
       setbidDetails(bidDetailsArray);
-      const combinedData = await combineBidDetails(bidDetailsArray);
-      setCombineBidData(combinedData);
       navigate(`/bidData/CLOSE:${gameName}`);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -287,7 +282,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
               if (marketType.exists()) {
                 marketType.forEach((gameName) => {
                   const marketName = gameName.key || "";
-                  const numbers: { [number: string]: number } = {};
+                  const numbers: { number: string; points: number }[] = [];
                   let marketTotalPoints = 0;
 
                   gameName.forEach((numberSnapshot) => {
@@ -296,18 +291,17 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
                       const points = numberSnapshot.val().POINTS || 0;
 
                       marketTotalPoints += points;
-                      numbers[number] = points;
+                      numbers.push({ number, points });
                     }
                   });
 
-                  const sortedNumbers = Object.fromEntries(
-                    Object.entries(numbers).sort(([, a], [, b]) => a - b)
-                  );
+                  // Sort the numbers array by points
+                  numbers.sort((a, b) => a.points - b.points);
 
                   bidDetailsArray.push({
                     appName: `${game.appName}:${game.gameKey}:${game.gameName}`,
                     marketName,
-                    numbers: sortedNumbers,
+                    numbers,
                     marketTotalPoints,
                   });
                 });
@@ -337,43 +331,6 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
     );
 
     return bidDetailsArray;
-  };
-
-  const combineBidDetails = async (
-    bidDetailsArray: MarketDetailsType[]
-  ): Promise<CombineBidDataType[]> => {
-    // const dbRef = ref(database, "FIREBASE CONFIGURATIONS");
-    // const dbSnapshot = await get(dbRef);
-    // const resultSnapshot = await get(ref(database, "RESULTS"));
-
-    const combinedData: CombineBidDataType[] = [];
-    const combinedBidsMap: { [marketName: string]: CombineBidDataType } = {};
-
-    bidDetailsArray.forEach((bid) => {
-      const { marketName, numbers, marketTotalPoints, appName } = bid;
-
-      if (combinedBidsMap[marketName]) {
-        combinedBidsMap[marketName].appName.push(appName);
-        combinedBidsMap[marketName].marketTotalPoints += marketTotalPoints;
-
-        Object.keys(numbers).forEach((number) => {
-          combinedBidsMap[marketName].numbers[number] =
-            (combinedBidsMap[marketName].numbers[number] || 0) +
-            numbers[number];
-        });
-      } else {
-        combinedBidsMap[marketName] = {
-          appName: [appName],
-          marketName,
-          numbers: { ...numbers },
-          marketTotalPoints,
-        };
-      }
-    });
-
-    combinedData.push(...Object.values(combinedBidsMap));
-
-    return combinedData;
   };
 
   const handleReturn = async (gameData: BidDataType) => {
