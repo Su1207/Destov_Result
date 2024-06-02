@@ -123,25 +123,30 @@ const BidDetails: React.FC<{ gameType: string | undefined }> = ({
 
   useEffect(() => {
     const combinedData = combineBidDetails();
-
-    // Sorting based on selected menu item
-    combinedData.forEach((data) => {
-      data.numbers = data.numbers.sort((a, b) => {
-        const aValue: number = a.points;
-        const bValue: number = b.points;
-        return selectedMenuItem === "High" ? bValue - aValue : aValue - bValue;
-      });
-    });
-
     setCombineBidData(combinedData);
+  }, [bidDetails]);
 
-    // Calculate total points
-    let totalPoints = 0;
-    combinedData.forEach((data) => {
-      totalPoints += data.marketTotalPoints;
-    });
-    setTotalPoints(totalPoints);
-  }, [selectedMenuItem, bidDetails]);
+  useEffect(() => {
+    // Sorting based on selected menu item
+    if (combinebidData) {
+      combinebidData.forEach((data) => {
+        data.numbers = data.numbers.sort((a, b) => {
+          const aValue: number = a.points;
+          const bValue: number = b.points;
+          return selectedMenuItem === "High"
+            ? bValue - aValue
+            : aValue - bValue;
+        });
+      });
+
+      // Calculate total points
+      let totalPoints = 0;
+      combinebidData.forEach((data) => {
+        totalPoints += data.marketTotalPoints;
+      });
+      setTotalPoints(totalPoints);
+    }
+  }, [selectedMenuItem, bidDetails, combinebidData]);
 
   const handleMenuItemClick = (value: string) => {
     setSelectedMenuItem(value);
