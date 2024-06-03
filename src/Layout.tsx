@@ -189,8 +189,6 @@ const Layout = (props: Props) => {
 
   const user = useSelector((state: RootState) => state.user.user);
 
-  console.log(user);
-
   const drawer = (
     <div className=" lg:hidden h-full" style={{ background: menuColor }}>
       {/* <Toolbar /> */}

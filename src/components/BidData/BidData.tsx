@@ -179,7 +179,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
             setLoading(false);
           }, 700);
 
-          console.log(bidData);
+          console.log(bidDataArray);
         }
       } catch (err) {
         console.log(err);
@@ -204,7 +204,7 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
           if (gameId.exists()) {
             const gameName = gameId.val().NAME;
             const updatedBidData = bidDataArray.filter(
-              (bid) => bid.gameName === gameName
+              (bid) => bid.gameName.trim() === gameName.trim()
             );
             if (updatedBidData.length > 0) {
               combineBid.push({
@@ -223,6 +223,8 @@ const BidData: React.FC<BidDataProps> = ({ date, month, year }) => {
       setLoading(false);
     }
   }, []);
+
+  console.log(bidData, combineBid);
 
   const handleOpenClick = async (gameData: BidDataType[], gameName: string) => {
     try {

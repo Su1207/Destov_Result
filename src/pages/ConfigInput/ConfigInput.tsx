@@ -134,7 +134,7 @@ const ConfigInput = () => {
 
       const resultSnapshot = await get(resultRef);
 
-      const app1 = initializeApp(configData, `${configData.apiKey}`);
+      const app1 = initializeApp(configData, `${configData.name}`);
       const database1 = getDatabase(app1);
 
       const gameRef = ref(database1, "GAMES");
@@ -148,7 +148,12 @@ const ConfigInput = () => {
         let gameExist = false;
 
         resultSnapshot.forEach((marketKey) => {
-          if (marketKey.val().NAME === gameName) {
+          console.log(marketKey.val().NAME.trim(), gameName.trim());
+
+          if (
+            marketKey.val().NAME.trim().toLowerCase() ===
+            gameName.trim().toLowerCase()
+          ) {
             const appArray = marketKey.val().APP || [];
 
             if (!appArray.includes(configData.name)) {
@@ -313,6 +318,7 @@ const ConfigInput = () => {
       Messaging Sender ID: ${database.messagingSenderId}
       App ID: ${database.appId}
       Measurement ID: ${database.measurementId}
+      Server Key: ${database.authorizationKey}
     `;
 
     const blob = new Blob([configString], { type: "text/plain" });
@@ -549,6 +555,12 @@ const ConfigInput = () => {
                             Measurement ID -{" "}
                             <span className="text-xs text-gray-500">
                               {data.measurementId}
+                            </span>
+                          </li>
+                          <li className="text-sm  font-medium text-gray-700">
+                            Server Key -{" "}
+                            <span className="text-xs text-gray-500">
+                              {data.authorizationKey}
                             </span>
                           </li>
                           {/* <li className="text-sm  font-medium text-gray-700">
