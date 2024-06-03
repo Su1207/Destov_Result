@@ -278,7 +278,7 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                       const promise1 = get(gameNameRef).then((gameSnapshot) => {
                         if (gameSnapshot.exists()) {
                           gameSnapshot.forEach((gameKey) => {
-                            if (gameName === gameKey.val().NAME) {
+                            if (gameName.trim() === gameKey.val().NAME.trim()) {
                               const gameId = gameKey.key;
 
                               const newResultRef = ref(
@@ -520,7 +520,7 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                       const promise1 = get(gameNameRef).then((gameSnapshot) => {
                         if (gameSnapshot.exists()) {
                           gameSnapshot.forEach((gameKey) => {
-                            if (gameName === gameKey.val().NAME) {
+                            if (gameName.trim() === gameKey.val().NAME.trim()) {
                               const gameId = gameKey.key;
 
                               const bidRate = ref(database1, "ADMIN/GAME RATE");
