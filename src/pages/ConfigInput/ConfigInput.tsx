@@ -333,13 +333,13 @@ const ConfigInput = () => {
   };
 
   return (
-    <div className="w-full flex items-center justify-center">
+    <div className="w-full">
       {loading ? (
         <div className="w-full h-[100vh] flex items-center justify-center">
           <CircularProgress color="secondary" />
         </div>
       ) : (
-        <div className="w-[89vw] xs:w-[100%]">
+        <div className="w-[89vw] xs:w-[100%] overflow-auto lg:w-[95%]">
           <div className="bg-white border p-4 sm:p-8 shadow-lg rounded-sm mb-8">
             <div className=" font-bold text-[1.5rem] text-[#6c757d] mb-4">
               Firebase Configuration
