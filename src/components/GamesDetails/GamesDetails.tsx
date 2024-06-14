@@ -3,8 +3,6 @@ import { get, ref, onValue } from "firebase/database";
 import { database } from "../../firebase";
 import GamesDataGrid from "./GamesDataGrid";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useDispatch } from "react-redux";
-import { setResultData } from "../../store/result";
 
 export interface GameData {
   key: string;
@@ -26,10 +24,6 @@ const GamesDetails = () => {
   const year = currentDate.getFullYear().toString();
   const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
   const day = currentDate.getDate().toString().padStart(2, "0");
-
-  const dispatch = useDispatch();
-
-  console.log(gameData);
 
   useEffect(() => {
     const resultsRef = ref(database, "RESULTS");
@@ -73,7 +67,6 @@ const GamesDetails = () => {
           );
 
           setGameData(gamesData);
-          dispatch(setResultData(gamesData));
         }
       } catch (error) {
         console.error("Error fetching game data:", error);

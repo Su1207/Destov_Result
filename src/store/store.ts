@@ -11,11 +11,9 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 import userSlice from "./userSlice";
-import result from "./result";
 
 const rootReducer = combineReducers({
   user: userSlice,
-  result: result,
 });
 
 // Configure the persist configuration for the permissions reducer
