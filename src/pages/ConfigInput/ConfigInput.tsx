@@ -8,6 +8,7 @@ import {
   ref,
   remove,
   set,
+  update,
 } from "firebase/database";
 import { initializeApp } from "firebase/app";
 import { toast } from "react-toastify";
@@ -117,8 +118,15 @@ const ConfigInput = () => {
 
         gameSnapshot.forEach((gameKey) => {
           const gameName = gameKey.val().NAME;
+          const open = gameKey.val().OPEN;
+          const close = gameKey.val().CLOSE;
 
-          push(dataRef, { NAME: gameName, APP: [data.name] });
+          push(dataRef, {
+            NAME: gameName,
+            APP: [data.name],
+            CLOSE: close,
+            OPEN: open,
+          });
           // promises.push(promise);
         });
 
@@ -131,8 +139,10 @@ const ConfigInput = () => {
     try {
       setLoading(true);
       const resultRef = ref(database, "RESULTS");
+      const websiteREf = ref(database, "WEBSITE GAMES");
 
       const resultSnapshot = await get(resultRef);
+      const websiteSnapshot = await get(websiteREf);
 
       const app1 = initializeApp(configData, `${configData.name}`);
       const database1 = getDatabase(app1);
@@ -145,11 +155,11 @@ const ConfigInput = () => {
 
       gameSnapshot.forEach((gameKey) => {
         const gameName = gameKey.val().NAME;
+        const open = gameKey.val().OPEN;
+        const close = gameKey.val().CLOSE;
         let gameExist = false;
 
         resultSnapshot.forEach((marketKey) => {
-          console.log(marketKey.val().NAME.trim(), gameName.trim());
-
           if (
             marketKey.val().NAME.trim().toLowerCase() ===
             gameName.trim().toLowerCase()
@@ -160,7 +170,7 @@ const ConfigInput = () => {
               appArray.push(configData.name);
 
               const gameAppRef = ref(database, `RESULTS/${marketKey.key}/APP`);
-              const promise1 = set(gameAppRef, appArray);
+              const promise1 = update(gameAppRef, appArray);
               promises.push(promise1);
             }
 
@@ -168,7 +178,32 @@ const ConfigInput = () => {
           }
         });
         if (!gameExist) {
-          push(resultRef, { NAME: gameName, APP: [configData.name] });
+          push(resultRef, {
+            NAME: gameName,
+            APP: [configData.name],
+            OPEN: open,
+            CLOSE: close,
+          });
+        }
+
+        let webGameExist = false;
+
+        websiteSnapshot.forEach((marketKey) => {
+          if (
+            marketKey.val().NAME.trim().toLowerCase() ===
+            gameName.trim().toLowerCase()
+          ) {
+            webGameExist = true;
+          }
+        });
+
+        if (!webGameExist) {
+          const newGameData = {
+            NAME: gameName,
+            OPEN: open,
+            CLOSE: close,
+          };
+          push(websiteREf, newGameData);
         }
       });
 
