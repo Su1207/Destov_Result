@@ -126,6 +126,9 @@ const ConfigInput = () => {
             APP: [data.name],
             CLOSE: close,
             OPEN: open,
+            DAYS: gameKey.val().DAYS,
+            DISABLE: gameKey.val().DISABLE,
+            HIDDEN: gameKey.val().HIDDEN,
           });
           // promises.push(promise);
         });
@@ -183,6 +186,9 @@ const ConfigInput = () => {
             APP: [configData.name],
             OPEN: open,
             CLOSE: close,
+            DAYS: gameKey.val().DAYS,
+            DISABLE: gameKey.val().DISABLE,
+            HIDDEN: gameKey.val().HIDDEN,
           });
         }
 
@@ -202,6 +208,9 @@ const ConfigInput = () => {
             NAME: gameName,
             OPEN: open,
             CLOSE: close,
+            DAYS: gameKey.val().DAYS,
+            DISABLE: gameKey.val().DISABLE,
+            HIDDEN: gameKey.val().HIDDEN,
           };
           push(websiteREf, newGameData);
         }

@@ -1,5 +1,4 @@
 import { get, onValue, ref, remove } from "firebase/database";
-import { GameData } from "../../components/GamesDetails/GamesDetails";
 import { useEffect, useState, Fragment, useRef } from "react";
 import { database } from "../../firebase";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
@@ -10,6 +9,27 @@ import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
+import WebsiteOpenClose from "./WebsiteOpenClose";
+
+interface GameDetails {
+  key: string;
+  NAME: string;
+  OPEN: number;
+  CLOSE: number;
+  COLOR: string;
+  RESULT: string;
+  DISABLE: string;
+  HIDDEN: string;
+  DAYS: {
+    MON: string;
+    TUE: string;
+    WED: string;
+    THU: string;
+    FRI: string;
+    SAT: string;
+    SUN: string;
+  };
+}
 
 const formatResult = (open: string, mid: string, close: string): string => {
   return `${open}-${mid}-${close}`;
@@ -21,7 +41,7 @@ export type ClickPosition = {
 };
 
 const WebsiteMarket = () => {
-  const [result, setResult] = useState<GameData[] | null>(null);
+  const [result, setResult] = useState<GameDetails[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [addGame, setAddGame] = useState(false);
   const [gamekey, setgameKey] = useState("");
@@ -29,9 +49,17 @@ const WebsiteMarket = () => {
   const [color, setColor] = useState("");
   const [open, setOpen] = useState("");
   const [close, setClose] = useState("");
+  const [disable, setDisable] = useState("");
+  const [hidden, setHidden] = useState("");
+  const [days, setDays] = useState<Record<string, string>>();
   const [clickPosition, setClickPosition] = useState<ClickPosition | null>(
     null
   );
+  const [gameId, setGameId] = useState("");
+  const [gameName, setGameName] = useState("");
+
+  const [openClose, setOpenClose] = useState(false);
+
   const [editGame, setEditGame] = useState(false);
   const cancelButtonRef = useRef(null);
   const [openModal, setOpenModal] = useState(false);
@@ -48,22 +76,26 @@ const WebsiteMarket = () => {
       try {
         const snapshot2 = await get(resultRef2);
 
-        const combinedData: GameData[] = [];
+        const combinedData: GameDetails[] = [];
 
         if (snapshot2.exists()) {
           snapshot2.forEach((gameSnapshot) => {
             const gameKey = gameSnapshot.key;
+
             const resultData = gameSnapshot
-              .child(gameKey)
               .child(year)
               .child(month)
               .child(day)
               .val();
+
             const name = gameSnapshot.child("NAME").val();
-            const app = gameSnapshot.child("APP").val();
+            // const app = gameSnapshot.child("APP").val();
             const color = gameSnapshot.child("COLOR").val();
             const open = gameSnapshot.child("OPEN").val();
             const close = gameSnapshot.child("CLOSE").val();
+            const disable = gameSnapshot.child("DISABLE").val();
+            const hidden = gameSnapshot.child("HIDDEN").val();
+            const days = gameSnapshot.child("DAYS").val();
 
             const resultString = resultData
               ? formatResult(resultData.OPEN, resultData.MID, resultData.CLOSE)
@@ -75,8 +107,10 @@ const WebsiteMarket = () => {
               RESULT: resultString,
               OPEN: open,
               CLOSE: close,
-              APP: app,
               COLOR: color,
+              DISABLE: disable,
+              HIDDEN: hidden,
+              DAYS: days,
             });
           });
           setResult(combinedData);
@@ -95,7 +129,21 @@ const WebsiteMarket = () => {
     return () => {
       unsubscribeResults();
     };
-  }, [day, addGame, editGame, openModal]);
+  }, [day, addGame, editGame, openModal, openClose]);
+
+  const handleUpdate = (
+    event: React.MouseEvent,
+    gameid: string,
+    gameName: string
+  ) => {
+    setGameId(gameid);
+    setGameName(gameName);
+    setOpenClose(!openClose);
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left + window.scrollX; // Adjust for horizontal scroll
+    const y = event.clientY - rect.top + window.scrollY;
+    setClickPosition({ x, y });
+  };
 
   const convertToTime = (timestamp: number) => {
     const date = new Date(timestamp).toLocaleString();
@@ -126,6 +174,9 @@ const WebsiteMarket = () => {
     color: string,
     open: string,
     close: string,
+    disable: string,
+    hidden: string,
+    days: Record<string, string>,
     event: React.MouseEvent
   ) => {
     setgameKey(key);
@@ -133,12 +184,17 @@ const WebsiteMarket = () => {
     setColor(color);
     setOpen(open);
     setClose(close);
+    setDisable(disable);
+    setHidden(hidden);
+    setDays(days);
     setEditGame(!editGame);
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left + window.scrollX; // Adjust for horizontal scroll
     const y = event.clientY - rect.top + window.scrollY;
     setClickPosition({ x, y });
   };
+
+  console.log(result);
 
   return (
     <div className="w-full">
@@ -165,7 +221,19 @@ const WebsiteMarket = () => {
           name={name}
           open={open}
           close={close}
+          disable={disable}
+          hidden={hidden}
+          days={days}
           setEditGame={setEditGame}
+          clickPosition={clickPosition}
+        />
+      )}
+
+      {openClose && (
+        <WebsiteOpenClose
+          gameId={gameId}
+          gameName={gameName}
+          setOpenClose={setOpenClose}
           clickPosition={clickPosition}
         />
       )}
@@ -174,9 +242,9 @@ const WebsiteMarket = () => {
         <div className="w-full h-[100vh] flex items-center justify-center">
           <CircularProgress color="secondary" />
         </div>
-      ) : (
+      ) : result ? (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left border rtl:text-right text-gray-500 outline-none border-none">
+          <table className="w-full text-sm text-left border rtl:text-right text-gray-700 outline-none border-none">
             <thead className="text-sm text-white uppercase bg-blue-500">
               <tr>
                 <th scope="col" className="px-6 py-3">
@@ -190,6 +258,9 @@ const WebsiteMarket = () => {
                 </th>
                 <th scope="col" className="px-6 py-3 text-center">
                   RESULT
+                </th>
+                <th scope="col" className="px-6 py-3 text-center">
+                  Update Result
                 </th>
                 <th scope="col" className="px-6 py-3 text-center">
                   ACTIONS
@@ -216,9 +287,22 @@ const WebsiteMarket = () => {
                       {convertToTime(data.CLOSE)}
                     </td>
                     <td className="px-6 py-4 text-center">{data.RESULT}</td>
+                    <td className="px-6 py-4 text-center">
+                      <div className=" w-full flex items-center justify-center">
+                        <img
+                          onClick={(event) =>
+                            handleUpdate(event, data.key, data.NAME)
+                          }
+                          src="./update.png"
+                          alt="update"
+                          className="h-[30px] w-[30px] cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out"
+                        />
+                      </div>
+                    </td>
+
                     <td className="px-3 py-4 flex items-center gap-8 justify-center">
                       <PencilIcon
-                        className="h-6 w-6 cursor-pointer"
+                        className="h-6 w-6 hover:scale-110 transition-all duration-300 ease-in-out cursor-pointer"
                         onClick={(event) =>
                           handleEdit(
                             data.NAME,
@@ -226,12 +310,15 @@ const WebsiteMarket = () => {
                             data.COLOR,
                             String(data.OPEN),
                             String(data.CLOSE),
+                            data.DISABLE,
+                            data.HIDDEN,
+                            data.DAYS,
                             event
                           )
                         }
                       />
                       <TrashIcon
-                        className="h-6 w-6 cursor-pointer"
+                        className="h-6 w-6 cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out"
                         onClick={() => handleDelete(data.key)}
                       />
                     </td>
@@ -316,6 +403,10 @@ const WebsiteMarket = () => {
               </div>
             </Dialog>
           </Transition.Root>
+        </div>
+      ) : (
+        <div className="text-2xl h-[50vh] w-full flex items-center justify-center">
+          No data available
         </div>
       )}
     </div>

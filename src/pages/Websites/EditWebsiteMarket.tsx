@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ClickPosition } from "./WebsiteMarket";
 import { GameForm } from "./AddWebsiteMarket";
 import { ChromePicker, ColorResult } from "react-color";
-import { useMediaQuery } from "@mui/material";
+import { FormControlLabel, Switch, useMediaQuery } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers/icons";
 import { toast } from "react-toastify";
 import { ref, update } from "firebase/database";
@@ -30,6 +30,9 @@ type Props = {
   open: string;
   close: string;
   name: string;
+  disable: string;
+  hidden: string;
+  days: Record<string, string> | undefined;
   setEditGame: React.Dispatch<React.SetStateAction<boolean>>;
   clickPosition: ClickPosition | null;
 };
@@ -40,6 +43,9 @@ const EditWebsiteMarket = ({
   open,
   close,
   name,
+  disable,
+  hidden,
+  days,
   setEditGame,
   clickPosition,
 }: Props) => {
@@ -48,20 +54,18 @@ const EditWebsiteMarket = ({
     OPEN: dateFetched(open),
     CLOSE: dateFetched(close),
     COLOR: color || "#fff",
-    // DISABLE: false,
-    // HIDDEN: false,
-    // DAYS: {
-    //   MON: true,
-    //   TUE: true,
-    //   WED: true,
-    //   THU: true,
-    //   FRI: true,
-    //   SAT: true,
-    //   SUN: true,
-    // },
+    DISABLE: disable === "false" ? false : true,
+    HIDDEN: hidden === "false" ? false : true,
+    DAYS: {
+      MON: days?.MON === "false" ? false : true,
+      TUE: days?.TUE === "false" ? false : true,
+      WED: days?.WED === "false" ? false : true,
+      THU: days?.THU === "false" ? false : true,
+      FRI: days?.FRI === "false" ? false : true,
+      SAT: days?.SAT === "false" ? false : true,
+      SUN: days?.SUN === "false" ? false : true,
+    },
   });
-
-  console.log(gamekey);
 
   const [modalOpen, setIsModalOpen] = useState(true);
 
@@ -97,7 +101,10 @@ const EditWebsiteMarket = ({
     setEditGame(false);
   };
 
-  const handleInputChange = (field: keyof GameForm, value: string | number) => {
+  const handleInputChange = (
+    field: keyof GameForm,
+    value: string | boolean | Record<string, boolean>
+  ) => {
     setGameData((prevGameData) => ({
       ...prevGameData,
       [field]: value,
@@ -109,6 +116,11 @@ const EditWebsiteMarket = ({
 
     if (gameData.NAME && gameData.OPEN && gameData.CLOSE && gameData.COLOR) {
       const gamesRef = ref(database, `WEBSITE GAMES/${gamekey}`);
+
+      const daysAsString: Record<string, string> = {};
+      for (const [day, isChecked] of Object.entries(gameData.DAYS)) {
+        daysAsString[day] = isChecked.toString();
+      }
 
       try {
         const currentDate = new Date();
@@ -124,6 +136,9 @@ const EditWebsiteMarket = ({
           OPEN: openDateTime.getTime(),
           CLOSE: closeDateTime.getTime(),
           COLOR: gameData.COLOR,
+          DISABLED: gameData.DISABLE.toString(),
+          HIDDEN: gameData.HIDDEN.toString(),
+          DAYS: daysAsString,
         });
 
         toast.success("Game updated successfully!");
@@ -147,7 +162,7 @@ const EditWebsiteMarket = ({
           <ClearIcon />
         </span>
         <h1 className="add_new_title text-2xl font-bold">
-          Add New Market
+          Edit Market
           <span className="addNew">
             {/* <img src={AddNew} alt="Add New" className="add-new_img" /> */}
           </span>
@@ -184,15 +199,7 @@ const EditWebsiteMarket = ({
             />
           </div>
 
-          <div className="item1">
-            <ChromePicker
-              color={gameData.COLOR}
-              onChange={handleColorChange}
-              styles={pickerStyles}
-            />
-          </div>
-
-          {/* <div className="toggle_switch">
+          <div className="toggle_switch">
             <FormControlLabel
               control={
                 <Switch
@@ -216,11 +223,11 @@ const EditWebsiteMarket = ({
               }
               label="Hidden"
             />
-          </div> */}
+          </div>
 
           {/* <div className="days_opening_title">Market Opening Days</div> */}
 
-          {/* <div className="days_opening">
+          <div className="days_opening">
             {Object.entries(gameData.DAYS).map(([day, isChecked]) => (
               <span key={day}>
                 <input
@@ -236,7 +243,16 @@ const EditWebsiteMarket = ({
                 {day}
               </span>
             ))}
-          </div> */}
+          </div>
+
+          <div className="item1">
+            <ChromePicker
+              color={gameData.COLOR}
+              onChange={handleColorChange}
+              styles={pickerStyles}
+            />
+          </div>
+
           <button className="add_btn" type="submit">
             Update Market
           </button>
