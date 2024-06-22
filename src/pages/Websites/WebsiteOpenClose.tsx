@@ -48,7 +48,7 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
   const handleClose = () => {
     const resultRef = ref(
       database,
-      `WEBSITE GAMES/${gameId}/${year}/${month}/${date}`
+      `WEBSITE GAMES/${gameId}/RESULT/${year}/${month}/${date}`
     );
 
     get(resultRef).then((snapshot) => {
@@ -78,7 +78,7 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
       try {
         const resultRef = ref(
           database,
-          `WEBSITE GAMES/${gameId}/${year}/${month}/${date}`
+          `WEBSITE GAMES/${gameId}/RESULT/${year}/${month}/${date}`
         );
 
         const singleDigit = String(
@@ -114,7 +114,7 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
       try {
         const resultRef = ref(
           database,
-          `WEBSITE GAMES/${gameId}/${year}/${month}/${date}`
+          `WEBSITE GAMES/${gameId}/RESULT/${year}/${month}/${date}`
         );
 
         get(resultRef).then(async (snapshot) => {

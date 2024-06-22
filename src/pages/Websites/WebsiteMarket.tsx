@@ -10,8 +10,9 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import WebsiteOpenClose from "./WebsiteOpenClose";
+import UploadResultModal from "../../components/UploadResult/UploadResultModal";
 
-interface GameDetails {
+export interface GameDetails {
   key: string;
   NAME: string;
   OPEN: number;
@@ -63,6 +64,8 @@ const WebsiteMarket = () => {
   const [editGame, setEditGame] = useState(false);
   const cancelButtonRef = useRef(null);
   const [openModal, setOpenModal] = useState(false);
+  const [openUpload, setOpenUpload] = useState(false);
+  const cancelRef = useRef(null);
 
   const currentDate = new Date();
   const year = currentDate.getFullYear().toString();
@@ -83,6 +86,7 @@ const WebsiteMarket = () => {
             const gameKey = gameSnapshot.key;
 
             const resultData = gameSnapshot
+              .child("RESULT")
               .child(year)
               .child(month)
               .child(day)
@@ -196,6 +200,11 @@ const WebsiteMarket = () => {
 
   console.log(result);
 
+  const UploadResult = (gameKey: string) => {
+    setGameId(gameKey);
+    setOpenUpload(!openUpload);
+  };
+
   return (
     <div className="w-full">
       <div className="flex items-center gap-8 justify-end mb-4">
@@ -212,6 +221,15 @@ const WebsiteMarket = () => {
         <div>
           <AddWebsiteMarket setAddGame={setAddGame} />
         </div>
+      )}
+
+      {openUpload && (
+        <UploadResultModal
+          open={openUpload}
+          setOpen={setOpenUpload}
+          cancelButtonRef={cancelRef}
+          gameKey={gameId}
+        />
       )}
 
       {editGame && (
@@ -272,11 +290,18 @@ const WebsiteMarket = () => {
                 result.map((data, index) => (
                   <tr
                     key={index}
-                    className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700"
+                    className="border"
+                    style={{
+                      backgroundColor:
+                        data?.COLOR === "#fffff" || data?.COLOR === "#fff"
+                          ? "transparent"
+                          : data?.COLOR,
+                    }}
                   >
                     <th
+                      onClick={() => UploadResult(data.key)}
                       scope="row"
-                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                      className="px-6 py-4 font-medium cursor-pointer text-gray-900 whitespace-nowrap dark:text-white"
                     >
                       {data.NAME}
                     </th>

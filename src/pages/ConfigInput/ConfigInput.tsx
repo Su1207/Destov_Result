@@ -8,7 +8,6 @@ import {
   ref,
   remove,
   set,
-  update,
 } from "firebase/database";
 import { initializeApp } from "firebase/app";
 import { toast } from "react-toastify";
@@ -142,6 +141,7 @@ const ConfigInput = () => {
     try {
       setLoading(true);
       const resultRef = ref(database, "RESULTS");
+
       const websiteREf = ref(database, "WEBSITE GAMES");
 
       const resultSnapshot = await get(resultRef);
@@ -158,37 +158,47 @@ const ConfigInput = () => {
 
       gameSnapshot.forEach((gameKey) => {
         const gameName = gameKey.val().NAME;
-        const open = gameKey.val().OPEN;
-        const close = gameKey.val().CLOSE;
+        const open = gameKey.val().OPEN ?? null;
+        const close = gameKey.val().CLOSE ?? null;
+        const days = gameKey.val().DAYS ?? null;
+        const disable = gameKey.val().DISABLE || "false";
+        const hidden = gameKey.val().HIDDEN || "false";
         let gameExist = false;
 
-        resultSnapshot.forEach((marketKey) => {
-          if (
-            marketKey.val().NAME.trim().toLowerCase() ===
-            gameName.trim().toLowerCase()
-          ) {
-            const appArray = marketKey.val().APP || [];
+        if (resultSnapshot.exists()) {
+          resultSnapshot.forEach((marketKey) => {
+            console.log(marketKey.val().NAME.trim(), gameName.trim());
 
-            if (!appArray.includes(configData.name)) {
-              appArray.push(configData.name);
+            if (
+              marketKey.val().NAME.trim().toLowerCase() ===
+              gameName.trim().toLowerCase()
+            ) {
+              const appArray = marketKey.val().APP || [];
 
-              const gameAppRef = ref(database, `RESULTS/${marketKey.key}/APP`);
-              const promise1 = update(gameAppRef, appArray);
-              promises.push(promise1);
+              if (!appArray.includes(configData.name)) {
+                appArray.push(configData.name);
+
+                const gameAppRef = ref(
+                  database,
+                  `RESULTS/${marketKey.key}/APP`
+                );
+                const promise1 = set(gameAppRef, appArray);
+                promises.push(promise1);
+              }
+
+              gameExist = true;
             }
-
-            gameExist = true;
-          }
-        });
+          });
+        }
         if (!gameExist) {
           push(resultRef, {
             NAME: gameName,
             APP: [configData.name],
             OPEN: open,
             CLOSE: close,
-            DAYS: gameKey.val().DAYS,
-            DISABLE: gameKey.val().DISABLE,
-            HIDDEN: gameKey.val().HIDDEN,
+            HIDDEN: hidden,
+            DISABLE: disable,
+            DAYS: days,
           });
         }
 
@@ -208,9 +218,9 @@ const ConfigInput = () => {
             NAME: gameName,
             OPEN: open,
             CLOSE: close,
-            DAYS: gameKey.val().DAYS,
-            DISABLE: gameKey.val().DISABLE,
-            HIDDEN: gameKey.val().HIDDEN,
+            DAYS: days,
+            DISABLE: disable,
+            HIDDEN: hidden,
           };
           push(websiteREf, newGameData);
         }

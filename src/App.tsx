@@ -17,6 +17,7 @@ import WinDetailPage from "./pages/ResultDataPage/WinDetailPage";
 import HomePage from "./pages/HomePage/HomePage";
 // import Website from "./pages/Websites/Website";
 import WebsiteMarket from "./pages/Websites/WebsiteMarket";
+import UploadAndDisplay from "./pages/BulkResultUpload/UploadAndDisplay";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "/website",
         element: <WebsiteMarket />,
+      },
+      {
+        path: "/bulkResult",
+        element: <UploadAndDisplay />,
       },
       // {
       //   path: "/website",
