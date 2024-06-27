@@ -1,4 +1,4 @@
-import { get, onValue, ref, remove } from "firebase/database";
+import { get, onValue, ref, remove, set } from "firebase/database";
 import { useEffect, useState, Fragment, useRef } from "react";
 import { database } from "../../firebase";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
@@ -11,10 +11,12 @@ import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import WebsiteOpenClose from "./WebsiteOpenClose";
 import UploadResultModal from "../../components/UploadResult/UploadResultModal";
+import UploadGoldenAnk from "../../components/UploadGoldenAnk";
 
 export interface GameDetails {
   key: string;
   NAME: string;
+  LUCKY_NO: string;
   OPEN: number;
   CLOSE: number;
   COLOR: string;
@@ -58,6 +60,8 @@ const WebsiteMarket = () => {
   );
   const [gameId, setGameId] = useState("");
   const [gameName, setGameName] = useState("");
+  const [goldenAnkUload, setGoldenAnkUpload] = useState(false);
+  const [openGoldenAnk, setOpenGoldenAnk] = useState(false);
 
   const [openClose, setOpenClose] = useState(false);
 
@@ -65,6 +69,8 @@ const WebsiteMarket = () => {
   const cancelButtonRef = useRef(null);
   const [openModal, setOpenModal] = useState(false);
   const [openUpload, setOpenUpload] = useState(false);
+  const [luckyModal, setLickyModal] = useState(false);
+  const [luckyNo, setLuckyNo] = useState("");
   const cancelRef = useRef(null);
 
   const currentDate = new Date();
@@ -100,6 +106,7 @@ const WebsiteMarket = () => {
             const disable = gameSnapshot.child("DISABLE").val();
             const hidden = gameSnapshot.child("HIDDEN").val();
             const days = gameSnapshot.child("DAYS").val();
+            const luckyNo = gameSnapshot.child("LUCKY_NO").val();
 
             const resultString = resultData
               ? formatResult(resultData.OPEN, resultData.MID, resultData.CLOSE)
@@ -115,6 +122,7 @@ const WebsiteMarket = () => {
               DISABLE: disable,
               HIDDEN: hidden,
               DAYS: days,
+              LUCKY_NO: luckyNo,
             });
           });
           setResult(combinedData);
@@ -158,6 +166,45 @@ const WebsiteMarket = () => {
   const handleDelete = (gameKey: string) => {
     setOpenModal(true);
     setgameKey(gameKey);
+    setLickyModal(false);
+  };
+
+  const handleLuckyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Allow only numeric input
+    if (value === "" || /^\d*$/.test(value)) {
+      setLuckyNo(value);
+    }
+  };
+
+  const handleLucky = (gameKey: string) => {
+    setOpenModal(true);
+    setgameKey(gameKey);
+    setLickyModal(true);
+  };
+
+  const handleLuckyUpload = async () => {
+    if (!luckyNo) {
+      return toast.error("Please enter valid lucky number");
+    }
+
+    try {
+      const dbRef = ref(database, `WEBSITE GAMES/${gamekey}/LUCKY_NO`);
+      await set(dbRef, luckyNo);
+      setOpenModal(false);
+      setLuckyNo("");
+      setLickyModal(false);
+      toast.success("Lucky No updated successfully!!!");
+    } catch (err) {
+      console.log(err);
+      toast.error("Error in deleting market, try again later");
+    }
+  };
+
+  const handleGoldenClick = () => {
+    setOpenGoldenAnk(true);
+    setGoldenAnkUpload(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -207,7 +254,13 @@ const WebsiteMarket = () => {
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-8 justify-end mb-4">
+      <div className="flex items-center gap-4 justify-end mb-4">
+        <div
+          onClick={handleGoldenClick}
+          className="cursor-pointer flex items-center gap-2 text-sm font-semibold bg-orange-500 text-white px-3 py-3 rounded"
+        >
+          Upload Golden Ank
+        </div>
         <div
           onClick={() => setAddGame(!addGame)}
           className="cursor-pointer flex items-center gap-2 text-sm font-semibold bg-orange-500 text-white px-3 py-2 rounded"
@@ -256,6 +309,14 @@ const WebsiteMarket = () => {
         />
       )}
 
+      {goldenAnkUload && (
+        <UploadGoldenAnk
+          openModal={openGoldenAnk}
+          cancelButtonRef={cancelButtonRef}
+          setOpenModal={setOpenGoldenAnk}
+        />
+      )}
+
       {isLoading ? (
         <div className="w-full h-[100vh] flex items-center justify-center">
           <CircularProgress color="secondary" />
@@ -276,6 +337,9 @@ const WebsiteMarket = () => {
                 </th>
                 <th scope="col" className="px-6 py-3 text-center">
                   RESULT
+                </th>
+                <th scope="col" className="px-6 py-3 text-center">
+                  Lucky No
                 </th>
                 <th scope="col" className="px-6 py-3 text-center">
                   Update Result
@@ -312,6 +376,13 @@ const WebsiteMarket = () => {
                       {convertToTime(data.CLOSE)}
                     </td>
                     <td className="px-6 py-4 text-center">{data.RESULT}</td>
+                    <td
+                      className="px-6 py-4 text-center cursor-pointer"
+                      onClick={() => handleLucky(data.key)}
+                    >
+                      {data.LUCKY_NO ? data.LUCKY_NO : "✦"}
+                    </td>
+
                     <td className="px-6 py-4 text-center">
                       <div className=" w-full flex items-center justify-center">
                         <img
@@ -395,12 +466,31 @@ const WebsiteMarket = () => {
                               as="h3"
                               className="text-base font-semibold leading-6 text-gray-900"
                             >
-                              Market Delete
+                              {luckyModal
+                                ? "Add Lucky Number"
+                                : "Market Delete"}
                             </Dialog.Title>
                             <div className="mt-2">
-                              <p className="text-sm text-gray-500">
-                                Are you sure want to delete the market?
-                              </p>
+                              {!luckyModal ? (
+                                <p className="text-sm text-gray-500">
+                                  Are you sure want to delete the market?
+                                </p>
+                              ) : (
+                                <div className=" flex items-center justify-center my-4 w-full">
+                                  <input
+                                    type="text"
+                                    className="w-full outline-none rounded-sm px-3 py-2 text-sm"
+                                    placeholder="Enter lucky number"
+                                    value={luckyNo}
+                                    onChange={handleLuckyChange}
+                                    pattern="[0-9]"
+                                    title="Please enter exactly 1 numeric digits"
+                                    inputMode="numeric"
+                                    required
+                                    maxLength={1}
+                                  />
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -409,9 +499,11 @@ const WebsiteMarket = () => {
                         <button
                           type="button"
                           className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
-                          onClick={handleConfirmDelete}
+                          onClick={
+                            luckyModal ? handleLuckyUpload : handleConfirmDelete
+                          }
                         >
-                          Delete
+                          {luckyModal ? "Add" : "Delete"}
                         </button>
                         <button
                           type="button"

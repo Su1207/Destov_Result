@@ -37,6 +37,7 @@ import { CircularProgress } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
 import LanguageIcon from "@mui/icons-material/Language";
+import clearLuckyNoDaily from "./pages/Websites/clearLuckyNoDaily";
 
 const drawerWidth = 240;
 
@@ -158,6 +159,8 @@ const Layout = (props: Props) => {
       setLoading(false);
     }
   }, []);
+
+  clearLuckyNoDaily();
 
   const handleDrawerOpen = () => {
     setOpen(true);
