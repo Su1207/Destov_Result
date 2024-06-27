@@ -19,6 +19,7 @@ const clearLuckyNoDaily = () => {
     try {
       // Reference to the WEBSITE GAMES path
       const gamesRef = ref(database, "WEBSITE GAMES");
+      const goldenRef = ref(database, "GOLDEN ANK");
 
       // Iterate through each game and clear the LUCKY_NO value
       const snapshot = await get(gamesRef);
@@ -27,6 +28,8 @@ const clearLuckyNoDaily = () => {
         const luckyNoRef = ref(database, `WEBSITE GAMES/${gameKey}/LUCKY_NO`);
         set(luckyNoRef, null);
       });
+
+      await set(goldenRef, null);
 
       console.log("LuckyNo values cleared successfully");
     } catch (error) {
