@@ -12,6 +12,229 @@ type OpenCloseProps = {
   clickPosition: ClickPosition | null;
 };
 
+const allowedResults = [
+  "137",
+  "128",
+  "146",
+  "236",
+  "245",
+  "290",
+  "380",
+  "470",
+  "489",
+  "560",
+  "678",
+  "579",
+  "119",
+  "155",
+  "227",
+  "335",
+  "344",
+  "399",
+  "588",
+  "669",
+  "777",
+  "100",
+  "129",
+  "138",
+  "147",
+  "156",
+  "237",
+  "246",
+  "345",
+  "390",
+  "480",
+  "570",
+  "589",
+  "679",
+  "110",
+  "228",
+  "255",
+  "336",
+  "499",
+  "660",
+  "688",
+  "778",
+  "200",
+  "444",
+  "120",
+  "139",
+  "148",
+  "157",
+  "238",
+  "247",
+  "256",
+  "346",
+  "490",
+  "580",
+  "670",
+  "689",
+  "166",
+  "229",
+  "337",
+  "355",
+  "445",
+  "599",
+  "779",
+  "788",
+  "300",
+  "111",
+  "130",
+  "149",
+  "158",
+  "167",
+  "239",
+  "248",
+  "257",
+  "347",
+  "356",
+  "590",
+  "680",
+  "789",
+  "112",
+  "220",
+  "266",
+  "338",
+  "446",
+  "455",
+  "699",
+  "770",
+  "400",
+  "888",
+  "140",
+  "159",
+  "168",
+  "230",
+  "249",
+  "258",
+  "267",
+  "348",
+  "357",
+  "456",
+  "690",
+  "780",
+  "113",
+  "122",
+  "177",
+  "339",
+  "366",
+  "447",
+  "799",
+  "889",
+  "500",
+  "555",
+  "123",
+  "150",
+  "169",
+  "178",
+  "240",
+  "259",
+  "268",
+  "349",
+  "358",
+  "367",
+  "457",
+  "790",
+  "114",
+  "277",
+  "330",
+  "448",
+  "466",
+  "556",
+  "880",
+  "899",
+  "600",
+  "222",
+  "124",
+  "160",
+  "179",
+  "250",
+  "269",
+  "278",
+  "340",
+  "359",
+  "368",
+  "458",
+  "467",
+  "890",
+  "115",
+  "133",
+  "188",
+  "223",
+  "377",
+  "449",
+  "557",
+  "566",
+  "700",
+  "999",
+  "125",
+  "134",
+  "170",
+  "189",
+  "260",
+  "279",
+  "350",
+  "369",
+  "378",
+  "459",
+  "468",
+  "567",
+  "116",
+  "224",
+  "233",
+  "288",
+  "440",
+  "477",
+  "558",
+  "990",
+  "800",
+  "666",
+  "126",
+  "135",
+  "180",
+  "234",
+  "270",
+  "289",
+  "360",
+  "379",
+  "450",
+  "469",
+  "478",
+  "568",
+  "117",
+  "144",
+  "199",
+  "225",
+  "388",
+  "559",
+  "577",
+  "667",
+  "900",
+  "333",
+  "127",
+  "136",
+  "145",
+  "190",
+  "235",
+  "280",
+  "370",
+  "389",
+  "460",
+  "479",
+  "569",
+  "578",
+  "118",
+  "226",
+  "244",
+  "299",
+  "334",
+  "488",
+  "668",
+  "677",
+  "000",
+  "550",
+];
+
 const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
   gameId,
   gameName,
@@ -35,14 +258,11 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
   const [openResult, setOpenResult] = useState(false);
   const [closeResult, setCloseResult] = useState(false);
 
-  // const [resultUpdated, setResultUpdated] = useState(false);
-
   const [openFormResult, setOpenFormResult] = useState("");
   const [closeFormResult, setCloseFormResult] = useState("");
 
   const handleOpen = () => {
     setOpenResult(!openResult);
-    // setOpenClose(false);
   };
 
   const handleClose = () => {
@@ -59,15 +279,13 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
         toast.error("You can't declare Close result before Open");
       }
     });
-
-    // setOpenClose(false);
   };
 
-  const handleOpenInputChnage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOpenInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOpenFormResult(e.target.value);
   };
 
-  const handleCloseInputChnage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCloseInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCloseFormResult(e.target.value);
   };
 
@@ -75,6 +293,11 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
     e.preventDefault();
 
     if (openFormResult) {
+      if (!allowedResults.includes(openFormResult)) {
+        toast.error("Invalid Open Result");
+        return;
+      }
+
       try {
         const resultRef = ref(
           database,
@@ -111,6 +334,11 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
     e.preventDefault();
 
     if (closeFormResult) {
+      if (!allowedResults.includes(closeFormResult)) {
+        toast.error("Invalid Close Result");
+        return;
+      }
+
       try {
         const resultRef = ref(
           database,
@@ -145,7 +373,7 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
         });
       } catch (err) {
         console.log(err);
-        toast.error("Error in submitting result,try again later!");
+        toast.error("Error in submitting result, try again later!");
       }
     } else {
       toast.error("Close Result can't be empty");
@@ -156,6 +384,7 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
     <div
       className="openCloseOption_container"
       style={{ top: `${clickPosition?.y}px` }}
+      ref={modalRef}
     >
       {!openResult && !closeResult && (
         <div className="openCloseOption_main_container">
@@ -189,7 +418,7 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
               title="Please enter exactly 3 numeric digits"
               maxLength={3}
               inputMode="numeric"
-              onChange={handleOpenInputChnage}
+              onChange={handleOpenInputChange}
             />
             <button type="submit">Submit</button>
           </form>
@@ -210,7 +439,7 @@ const WebsiteOpenClose: React.FC<OpenCloseProps> = ({
               title="Please enter exactly 3 numeric digits"
               maxLength={3}
               inputMode="numeric"
-              onChange={handleCloseInputChnage}
+              onChange={handleCloseInputChange}
             />
             <button type="submit">Submit</button>
           </form>

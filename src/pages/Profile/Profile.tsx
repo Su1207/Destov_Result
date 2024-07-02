@@ -8,12 +8,14 @@ import { useAuth } from "../../components/Auth-context";
 interface User {
   ID: string;
   PASSWORD: string;
+  URL: string;
 }
 
 const Profile = () => {
   const [admin, setAdmin] = useState<User>({
     ID: "",
     PASSWORD: "",
+    URL: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -68,7 +70,7 @@ const Profile = () => {
           <CircularProgress color="secondary" />
         </div>
       ) : (
-        <div className="w-[100%] bg-white border p-4 xs:p-6 sm:p-8 shadow-lg rounded-sm">
+        <div className="w-[100%] bg-white  border p-4 xs:p-6 sm:p-8 shadow-lg rounded-md">
           <div className="font-bold text-[1rem] xs:text-[1.5rem] text-[#6c757d] mb-4">
             Admin Credentials
           </div>
@@ -98,6 +100,19 @@ const Profile = () => {
                   value={admin?.PASSWORD}
                   onChange={handleChange}
                   required
+                  className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none text-xs"
+                />
+              </div>
+
+              <div className="">
+                <label className="block text-xs  font-medium text-gray-500">
+                  URL<span className=" text-[#F05387]"></span>
+                </label>
+                <input
+                  type="text"
+                  name="URL"
+                  value={admin?.URL}
+                  onChange={handleChange}
                   className="mt-1 p-2 flex-1 w-full rounded-sm border border-gray-300 shadow-sm focus:outline-none text-xs"
                 />
               </div>
