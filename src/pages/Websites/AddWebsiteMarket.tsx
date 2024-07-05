@@ -13,6 +13,7 @@ export interface GameForm {
   CLOSE: string;
   COLOR: string;
   DISABLE: boolean;
+  LIVE_DISCLAIMER: boolean;
   HIDDEN: boolean;
   DAYS: {
     MON: boolean;
@@ -45,6 +46,7 @@ const AddWebsiteMarket = (props: Props) => {
     COLOR: "#fff",
     DISABLE: false,
     HIDDEN: false,
+    LIVE_DISCLAIMER: false,
     DAYS: {
       MON: true,
       TUE: true,
@@ -117,6 +119,7 @@ const AddWebsiteMarket = (props: Props) => {
           DISABLE: gameData.DISABLE.toString(),
           HIDDEN: gameData.HIDDEN.toString(),
           DAYS: daysAsString,
+          LIVE_DISCLAIMER: gameData.LIVE_DISCLAIMER,
         });
 
         // // Reset form fields after successful submission
@@ -221,6 +224,23 @@ const AddWebsiteMarket = (props: Props) => {
                 />
               }
               label="Hidden"
+            />
+
+            <FormControlLabel
+              className="formControl_switch"
+              control={
+                <Switch
+                  size="small"
+                  checked={gameData.LIVE_DISCLAIMER}
+                  onChange={() =>
+                    handleInputChange(
+                      "LIVE_DISCLAIMER",
+                      !gameData.LIVE_DISCLAIMER
+                    )
+                  }
+                />
+              }
+              label="Disclaimer"
             />
           </div>
 

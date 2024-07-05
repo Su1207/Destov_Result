@@ -20,6 +20,7 @@ export interface GameDetails {
   OPEN: number;
   CLOSE: number;
   COLOR: string;
+  LIVE_DISCLAIMER: boolean;
   RESULT: string;
   DISABLE: string;
   HIDDEN: string;
@@ -71,6 +72,7 @@ const WebsiteMarket = () => {
   const [openUpload, setOpenUpload] = useState(false);
   const [luckyModal, setLickyModal] = useState(false);
   const [luckyNo, setLuckyNo] = useState("");
+  const [disclaimer, setDisclaimer] = useState(false);
   const cancelRef = useRef(null);
 
   const currentDate = new Date();
@@ -107,6 +109,7 @@ const WebsiteMarket = () => {
             const hidden = gameSnapshot.child("HIDDEN").val();
             const days = gameSnapshot.child("DAYS").val();
             const luckyNo = gameSnapshot.child("LUCKY_NO").val();
+            const disclaimer = gameSnapshot.child("LIVE_DISCLAIMER").val();
 
             const resultString = resultData
               ? formatResult(resultData.OPEN, resultData.MID, resultData.CLOSE)
@@ -123,6 +126,7 @@ const WebsiteMarket = () => {
               HIDDEN: hidden,
               DAYS: days,
               LUCKY_NO: luckyNo,
+              LIVE_DISCLAIMER: disclaimer,
             });
           });
           setResult(combinedData);
@@ -228,6 +232,7 @@ const WebsiteMarket = () => {
     disable: string,
     hidden: string,
     days: Record<string, string>,
+    disclaimer: boolean,
     event: React.MouseEvent
   ) => {
     setgameKey(key);
@@ -238,6 +243,7 @@ const WebsiteMarket = () => {
     setDisable(disable);
     setHidden(hidden);
     setDays(days);
+    setDisclaimer(disclaimer);
     setEditGame(!editGame);
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left + window.scrollX; // Adjust for horizontal scroll
@@ -295,6 +301,7 @@ const WebsiteMarket = () => {
           disable={disable}
           hidden={hidden}
           days={days}
+          disclaimer={disclaimer}
           setEditGame={setEditGame}
           clickPosition={clickPosition}
         />
@@ -409,6 +416,7 @@ const WebsiteMarket = () => {
                             data.DISABLE,
                             data.HIDDEN,
                             data.DAYS,
+                            data.LIVE_DISCLAIMER,
                             event
                           )
                         }

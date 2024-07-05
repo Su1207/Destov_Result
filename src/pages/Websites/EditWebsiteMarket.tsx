@@ -33,6 +33,7 @@ type Props = {
   disable: string;
   hidden: string;
   days: Record<string, string> | undefined;
+  disclaimer: boolean;
   setEditGame: React.Dispatch<React.SetStateAction<boolean>>;
   clickPosition: ClickPosition | null;
 };
@@ -46,6 +47,7 @@ const EditWebsiteMarket = ({
   disable,
   hidden,
   days,
+  disclaimer,
   setEditGame,
   clickPosition,
 }: Props) => {
@@ -56,6 +58,7 @@ const EditWebsiteMarket = ({
     COLOR: color || "#fff",
     DISABLE: disable === "false" ? false : true,
     HIDDEN: hidden === "false" ? false : true,
+    LIVE_DISCLAIMER: disclaimer,
     DAYS: {
       MON: days?.MON === "false" ? false : true,
       TUE: days?.TUE === "false" ? false : true,
@@ -138,6 +141,7 @@ const EditWebsiteMarket = ({
           COLOR: gameData.COLOR,
           DISABLED: gameData.DISABLE.toString(),
           HIDDEN: gameData.HIDDEN.toString(),
+          LIVE_DISCLAIMER: gameData.LIVE_DISCLAIMER,
           DAYS: daysAsString,
         });
 
@@ -222,6 +226,22 @@ const EditWebsiteMarket = ({
                 />
               }
               label="Hidden"
+            />
+            <FormControlLabel
+              className="formControl_switch"
+              control={
+                <Switch
+                  size="small"
+                  checked={gameData.LIVE_DISCLAIMER}
+                  onChange={() =>
+                    handleInputChange(
+                      "LIVE_DISCLAIMER",
+                      !gameData.LIVE_DISCLAIMER
+                    )
+                  }
+                />
+              }
+              label="Disclaimer"
             />
           </div>
 
