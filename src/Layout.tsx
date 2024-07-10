@@ -36,8 +36,6 @@ import { database } from "./firebase";
 import { CircularProgress } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
-import LanguageIcon from "@mui/icons-material/Language";
-import clearLuckyNoDaily from "./pages/Websites/clearLuckyNoDaily";
 
 const drawerWidth = 240;
 
@@ -160,8 +158,6 @@ const Layout = (props: Props) => {
     }
   }, []);
 
-  clearLuckyNoDaily();
-
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -210,60 +206,51 @@ const Layout = (props: Props) => {
         </Typography>
       </Link>
       <List>
-        {[
-          "Dashboard",
-          "Market",
-          "Bid Data",
-          "Win Data",
-          "Setting",
-          "Website",
-        ].map((text, index) => (
-          <ListItem
-            key={text}
-            disablePadding
-            sx={{
-              display: "block",
-              "&:hover": { bgcolor: "#FAA912" },
-              transition: "all 0.3s ease-in-out",
-            }}
-            component={Link} // Use Link component from react-router-dom
-            to={
-              index === 0
-                ? "/"
-                : index === 1
-                ? "/market"
-                : index === 2
-                ? "/bidData"
-                : index === 3
-                ? "winData"
-                : index === 4
-                ? "/setting"
-                : "/website"
-            } // Define the route to navigate to
-          >
-            <ListItemButton onClick={() => setMobileOpen(false)}>
-              <ListItemIcon sx={{ color: "white" }}>
-                {index === 0 ? (
-                  <HomeIcon />
-                ) : index === 1 ? (
-                  <StorefrontIcon />
-                ) : index === 2 ? (
-                  <GavelIcon />
-                ) : index === 3 ? (
-                  <EmojiEventsIcon />
-                ) : index === 4 ? (
-                  <SettingsIcon />
-                ) : (
-                  <LanguageIcon />
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary={text}
-                sx={{ color: "white", fontSize: "0.5rem" }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {["Dashboard", "Market", "Bid Data", "Win Data", "Setting"].map(
+          (text, index) => (
+            <ListItem
+              key={text}
+              disablePadding
+              sx={{
+                display: "block",
+                "&:hover": { bgcolor: "#FAA912" },
+                transition: "all 0.3s ease-in-out",
+              }}
+              component={Link} // Use Link component from react-router-dom
+              to={
+                index === 0
+                  ? "/"
+                  : index === 1
+                  ? "/market"
+                  : index === 2
+                  ? "/bidData"
+                  : index === 3
+                  ? "winData"
+                  : "/setting"
+              } // Define the route to navigate to
+            >
+              <ListItemButton onClick={() => setMobileOpen(false)}>
+                <ListItemIcon sx={{ color: "white" }}>
+                  {index === 0 ? (
+                    <HomeIcon />
+                  ) : index === 1 ? (
+                    <StorefrontIcon />
+                  ) : index === 2 ? (
+                    <GavelIcon />
+                  ) : index === 3 ? (
+                    <EmojiEventsIcon />
+                  ) : (
+                    <SettingsIcon />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={text}
+                  sx={{ color: "white", fontSize: "0.5rem" }}
+                />
+              </ListItemButton>
+            </ListItem>
+          )
+        )}
       </List>
     </div>
   );
@@ -386,7 +373,6 @@ const Layout = (props: Props) => {
                       "Bid Data",
                       "Win Data",
                       "Setting",
-                      "Website",
                     ].map((text, index) => (
                       <ListItem
                         key={text}
@@ -406,9 +392,7 @@ const Layout = (props: Props) => {
                             ? "/bidData"
                             : index === 3
                             ? "winData"
-                            : index === 4
-                            ? "/setting"
-                            : "/website"
+                            : "/setting"
                         } // Define the route to navigate to
                       >
                         <ListItemButton
@@ -436,10 +420,8 @@ const Layout = (props: Props) => {
                               <GavelIcon />
                             ) : index === 3 ? (
                               <EmojiEventsIcon />
-                            ) : index === 4 ? (
-                              <SettingsIcon />
                             ) : (
-                              <LanguageIcon />
+                              <SettingsIcon />
                             )}
                           </ListItemIcon>
                           <ListItemText
