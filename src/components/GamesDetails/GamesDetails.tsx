@@ -22,10 +22,40 @@ const GamesDetails = () => {
   const [gameData, setGameData] = useState<GameData[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const currentDate = new Date();
-  const year = currentDate.getFullYear().toString();
-  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-  const day = currentDate.getDate().toString().padStart(2, "0");
+  const getAdjustedDate = () => {
+    const currentDate = new Date();
+
+    // Get current hour to check if it's before or after 1 AM
+    const currentHour = currentDate.getHours();
+
+    // If the time is before 1 AM, use the previous day's date
+    if (currentHour < 1) {
+      currentDate.setDate(currentDate.getDate() - 1);
+      currentDate.setHours(0, 0, 0, 0);
+    }
+
+    const year = currentDate.getFullYear().toString();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+    const day = currentDate.getDate().toString().padStart(2, "0");
+
+    // const hour = (currentDate.getHours() % 12 || 12)
+    //   .toString()
+    //   .padStart(2, "0");
+    // const min = currentDate.getMinutes().toString().padStart(2, "0");
+    // const sec = currentDate.getSeconds().toString().padStart(2, "0");
+
+    // // Determine AM/PM
+    // const meridiem = currentDate.getHours() >= 12 ? "PM" : "AM";
+
+    // // Create date string in desired format
+    // const dateString = `${date}-${month}-${year} | ${hour}:${min}:${sec} ${meridiem}`;
+
+    // const timestamp = currentDate.getTime();
+
+    return { year, month, day };
+  };
+
+  const { year, month, day } = getAdjustedDate();
 
   useEffect(() => {
     const resultsRef = ref(database, "RESULTS");

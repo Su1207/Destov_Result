@@ -15,17 +15,38 @@ type OpenCloseProps = {
   clickPosition: ClickPosition | null;
 };
 
-const currentDate = new Date();
-const year = currentDate.getFullYear();
-const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-const date = currentDate.getDate().toString().padStart(2, "0");
-const hour = (currentDate.getHours() % 12 || 12).toString().padStart(2, "0");
-const min = currentDate.getMinutes().toString().padStart(2, "0");
-const sec = currentDate.getSeconds().toString().padStart(2, "0");
+const getAdjustedDate = () => {
+  const currentDate = new Date();
 
-const meridiem = currentDate.getHours() >= 12 ? "PM" : "AM";
+  // Get current hour to check if it's before or after 1 AM
+  const currentHour = currentDate.getHours();
 
-const dateString = `${date}-${month}-${year} | ${hour}:${min}:${sec} ${meridiem}`;
+  // If the time is before 1 AM, use the previous day's date
+  if (currentHour < 1) {
+    currentDate.setDate(currentDate.getDate() - 1);
+    currentDate.setHours(0, 0, 0, 0);
+  }
+
+  const year = currentDate.getFullYear();
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+  const date = currentDate.getDate().toString().padStart(2, "0");
+
+  const hour = (currentDate.getHours() % 12 || 12).toString().padStart(2, "0");
+  const min = currentDate.getMinutes().toString().padStart(2, "0");
+  const sec = currentDate.getSeconds().toString().padStart(2, "0");
+
+  // Determine AM/PM
+  const meridiem = currentDate.getHours() >= 12 ? "PM" : "AM";
+
+  // Create date string in desired format
+  const dateString = `${date}-${month}-${year} | ${hour}:${min}:${sec} ${meridiem}`;
+
+  const timestamp = currentDate.getTime();
+
+  return { year, month, date, dateString, timestamp };
+};
+
+const { year, month, date, dateString, timestamp } = getAdjustedDate();
 
 const OpenCloseOption: React.FC<OpenCloseProps> = ({
   gameId,
@@ -133,19 +154,19 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
 
         const totalTransactionTotalRef = ref(
           database1,
-          `TOTAL TRANSACTION/WIN/TOTAL/${gameId}/${Date.now()}`
+          `TOTAL TRANSACTION/WIN/TOTAL/${gameId}/${timestamp}`
         );
         const totalTransactionDateWiseRef = ref(
           database1,
-          `TOTAL TRANSACTION/WIN/DATE WISE/${year}/${month}/${date}/${gameId}/${Date.now()}`
+          `TOTAL TRANSACTION/WIN/DATE WISE/${year}/${month}/${date}/${gameId}/${timestamp}`
         );
         const userTransactionDateWiseRef = ref(
           database1,
-          `USERS TRANSACTION/${phoneNumber}/WIN/DATE WISE/${year}/${month}/${date}/${gameId}/${Date.now()}`
+          `USERS TRANSACTION/${phoneNumber}/WIN/DATE WISE/${year}/${month}/${date}/${gameId}/${timestamp}`
         );
         const userTransactionTotalRef = ref(
           database1,
-          `USERS TRANSACTION/${phoneNumber}/WIN/TOTAL/${gameId}/${Date.now()}`
+          `USERS TRANSACTION/${phoneNumber}/WIN/TOTAL/${gameId}/${timestamp}`
         );
 
         await Promise.all([
@@ -265,8 +286,6 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                   const gameNameRef = ref(database1, "GAMES");
 
                   const bidRate = ref(database1, "ADMIN/GAME RATE");
-
-                  const timestamp = Date.now();
 
                   const promise5 = get(bidRate).then((snapshot) => {
                     if (snapshot.exists()) {
@@ -650,8 +669,6 @@ const OpenCloseOption: React.FC<OpenCloseProps> = ({
                                 database1,
                                 `RESULTS/${gameId}/${year}/${month}/${date}`
                               );
-
-                              const timestamp = Date.now();
 
                               const totalRef = ref(
                                 database1,
